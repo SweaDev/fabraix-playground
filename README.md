@@ -27,9 +27,10 @@ That last step matters most. Every technique we publish advances what the commun
 ## Project structure
 
 - [`/src`](src/) — React frontend (TypeScript, Vite, Tailwind)
+- [`/engine`](engine/) — self-hostable FastAPI backend + agent runtime ([setup](engine/README.md))
 - [`/challenges`](challenges/) — every challenge config and system prompt, versioned and open
 
-Guardrail evaluation runs server-side to prevent client-side tampering. The agent runtime is being open-sourced separately.
+Guardrail evaluation runs server-side in the engine to prevent client-side tampering.
 
 ## Run locally
 
@@ -53,5 +54,5 @@ VITE_API_URL=http://localhost:8000/v1 npm run dev
 
 ## About Fabraix
 
-We build runtime security for AI agents at [Fabraix](https://fabraix.com). The Playground is how we stress-test defenses in the open and how the broader community contributes to the shared understanding of AI security and failure modes. The more people probing these systems, the better the outcomes for everyone building with AI.
+We build AI agents to find vulnerabilities in other AI agents at [Fabraix](https://fabraix.com). The Playground is how we stress-test defenses in the open and how the broader community contributes to the shared understanding of AI security and failure modes. The more people probing these systems, the better the outcomes for everyone building with AI.
 

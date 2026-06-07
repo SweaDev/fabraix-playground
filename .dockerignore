@@ -1,0 +1,24 @@
+# Shared by both image builds (frontend and engine). Keep secrets and build
+# artifacts out of the Docker build context.
+
+# Secrets / local env — never bake these into an image.
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Node / Vite build artifacts (the image builds its own).
+node_modules
+**/node_modules
+dist
+**/dist
+
+# Python caches and local SQLite stores.
+**/__pycache__
+**/*.pyc
+*.db
+**/*.db
+
+# VCS / tooling noise.
+.git
+.gitignore

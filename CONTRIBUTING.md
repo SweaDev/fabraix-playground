@@ -24,7 +24,7 @@ If something's broken, open an issue. Include what you expected to happen, what 
 
 ## Code
 
-The frontend is synced from an internal repository — we don't accept code PRs directly yet. If you have a suggestion, open an issue describing what you'd change and why. If it's a good fit, we'll build it and it'll land in the next sync.
+We don't accept frontend code PRs directly yet. If you have a suggestion, open an issue describing what you'd change and why — if it's a good fit, we'll build it and ship it in a future release.
 
 ## Community
 

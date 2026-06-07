@@ -10,7 +10,7 @@ import type { AnalysisStatus, GuardrailState } from './analysis.types'
  */
 export interface SessionStartResponse {
     sessionId: string
-    traceId: string
+    guardrailsRunId: string
     challenge: {
         id: string
         name: string
@@ -25,7 +25,7 @@ export interface SessionStartResponse {
  */
 export interface SessionRestartResponse {
     sessionId: string
-    traceId: string
+    guardrailsRunId: string
     greeting: string
 }
 

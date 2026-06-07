@@ -1,5 +1,6 @@
 // API service for the playground application
 import { config } from './config'
+import { getOrCreateUserId } from './utils/id.utils'
 import type {
     GlobalStats,
     ChallengeListItem,
@@ -108,8 +109,10 @@ export async function startSession(
     return apiRequest<SessionStartResponse>('/playground/sessions/start', {
         method: 'POST',
         body: JSON.stringify({
+            // The backend requires a user_identifier; fall back to a stable
+            // anonymous per-browser id when the caller doesn't supply one.
             challenge_id: challengeId,
-            user_identifier: userIdentifier,
+            user_identifier: userIdentifier ?? getOrCreateUserId(),
         }),
     })
 }

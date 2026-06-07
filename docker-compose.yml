@@ -1,0 +1,42 @@
+# Fabraix Playground — local full stack (frontend + engine + sqlite volume).
+#
+#   1. cp engine/.env.example engine/.env   # then add your API key(s)
+#   2. docker compose up --build
+#
+# Frontend: http://localhost:5173  (talks to the engine at /v1)
+# Engine:   http://localhost:8000  (/v1/playground/*, /health)
+
+services:
+  engine:
+    build:
+      # Context is the repository root (not engine/) so the package imports
+      # as `engine.*`.
+      context: .
+      dockerfile: engine/Dockerfile
+    env_file:
+      - engine/.env
+    environment:
+      # Override the store path so it lands on the mounted volume.
+      SQLITE_URL: sqlite+aiosqlite:////data/playground.db
+      PORT: "8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - playground-db:/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Vite inlines this at build time into the static bundle, so it MUST be
+        # a build arg (not a runtime `environment:` var, which `serve` ignores).
+        # Points the browser at the engine container's published /v1 base.
+        VITE_API_URL: http://localhost:8000/v1
+    ports:
+      - "5173:8080"
+    depends_on:
+      - engine
+
+volumes:
+  playground-db:
