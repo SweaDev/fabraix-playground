@@ -44,6 +44,7 @@ class PlaygroundSession(Base):
         Index("idx_playground_sessions_success", "success"),
         Index("idx_playground_sessions_agent_model", "agent_model"),
         Index("idx_playground_sessions_guardrails_model", "guardrails_model"),
+        Index("idx_playground_sessions_user_identifier", "user_identifier"),
     )
 
     id = _pid("playsess")
@@ -79,6 +80,10 @@ class PlaygroundMessage(Base):
     role = Column(Text, nullable=False)
     content = Column(Text, nullable=False)
     tools = Column(JSON)
+    # Optional author rationale for the message ("why I'm sending this"). NULL for
+    # ordinary players; an automated client may attach its per-message reasoning
+    # here. Stored only — never fed back into the agent's prompt.
+    thinking = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=_now)
 
     session = relationship("PlaygroundSession", back_populates="messages")

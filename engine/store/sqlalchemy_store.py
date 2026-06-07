@@ -140,11 +140,21 @@ class SqlAlchemyStore:
 
     # ----------------------------------------------------------------- messages
     async def add_message(
-        self, *, session_id: str, role: str, content: str, tools: list[dict] | None
+        self,
+        *,
+        session_id: str,
+        role: str,
+        content: str,
+        tools: list[dict] | None,
+        thinking: str | None = None,
     ) -> dict[str, Any]:
         async with self._session_factory() as session:
             row = PlaygroundMessage(
-                session_id=session_id, role=role, content=content, tools=tools
+                session_id=session_id,
+                role=role,
+                content=content,
+                tools=tools,
+                thinking=thinking,
             )
             session.add(row)
             await session.commit()

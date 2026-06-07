@@ -63,6 +63,11 @@ class PlaygroundChatRequest(BaseModel):
 
     session_id: str = Field(..., description="Session UUID")
     message: str = Field(..., min_length=1, max_length=4096, description="User message")
+    thinking: str | None = Field(
+        None,
+        description="Optional author rationale for the message ('why I'm sending this'). "
+        "Stored alongside the message; never shown to the agent.",
+    )
 
 
 class PlaygroundToolCall(BaseModel):

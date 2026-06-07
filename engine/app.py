@@ -330,6 +330,7 @@ def create_router(platform: Platform) -> APIRouter:
                     role="user",
                     content=request.message,
                     tools=None,
+                    thinking=request.thinking,
                 )
 
                 result = await agent.chat(
@@ -381,6 +382,7 @@ def create_router(platform: Platform) -> APIRouter:
                 role="user",
                 content=request.message,
                 tools=None,
+                thinking=request.thinking,
             )
 
             # Resolve secret by challenge slug
@@ -470,6 +472,7 @@ def create_router(platform: Platform) -> APIRouter:
                 role="user",
                 content=request.message,
                 tools=None,
+                thinking=request.thinking,
             )
         else:
             challenge = get_challenge(session["challenge_slug"])
@@ -486,6 +489,7 @@ def create_router(platform: Platform) -> APIRouter:
                 role="user",
                 content=request.message,
                 tools=None,
+                thinking=request.thinking,
             )
 
         async def event_generator():
