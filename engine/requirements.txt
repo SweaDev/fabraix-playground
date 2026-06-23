@@ -2,7 +2,7 @@ fastapi==0.111.0
 uvicorn==0.35.0
 sqlalchemy[asyncio]==2.0.48
 aiosqlite==0.22.1
-litellm==1.83.14
+litellm==1.89.0
 pydantic==2.12.5
 structlog==22.1.0
 pyyaml==6.0.1
