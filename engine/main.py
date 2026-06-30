@@ -47,10 +47,15 @@ def create_app() -> FastAPI:
     """Build the FastAPI app with the platform wired in (via the lifespan hook)."""
     app = FastAPI(title="Fabraix Playground", lifespan=_lifespan)
 
+    # Public, unauthenticated playground API: any origin may call it, but
+    # credentials are NOT allowed. Reflecting every origin together with
+    # credentials is the CORS vulnerability class we avoid here — and this
+    # engine has no cookies/sessions to expose, so disabling credentials
+    # costs nothing.
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_credentials=True,
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
