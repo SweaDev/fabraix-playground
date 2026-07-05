@@ -14,6 +14,37 @@ const DIFFICULTY_LABELS: Record<number, string> = {
     5: 'Insane',
 }
 
+/** Live "1d 22h 04m 31s" countdown until the prize week resets. */
+function formatTimeLeft(weekEnd: string, now: number): string | null {
+    const ms = new Date(weekEnd).getTime() - now
+    if (!Number.isFinite(ms) || ms <= 0) return null
+    const total = Math.floor(ms / 1_000)
+    const days = Math.floor(total / 86_400)
+    const hours = Math.floor((total % 86_400) / 3_600)
+    const minutes = Math.floor((total % 3_600) / 60)
+    const seconds = total % 60
+    const mm = String(minutes).padStart(2, '0')
+    const ss = String(seconds).padStart(2, '0')
+    if (days > 0) return `${days}d ${hours}h ${mm}m ${ss}s`
+    if (hours > 0) return `${hours}h ${mm}m ${ss}s`
+    return `${minutes}m ${ss}s`
+}
+
+/** Absolute end moment in UTC — the canonical deadline, e.g. "Mon 6 Jul, 00:00 UTC". */
+function formatEndDate(weekEnd: string): string {
+    const d = new Date(weekEnd)
+    if (Number.isNaN(d.getTime())) return ''
+    const s = d.toLocaleString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'UTC',
+    })
+    return `${s} UTC`
+}
+
 /**
  * Left rail giving the current challenge real presence (challenge name, persona,
  * difficulty, the weekly prize, and the player's weekly breaks) — the arena's
@@ -24,15 +55,33 @@ export function ChallengeRail() {
     const { challenge, activeChallengeId, weeklyBreaks } = usePlatform()
     const { user } = useAuth()
     const [prize, setPrize] = useState<string | null>(null)
+    const [weekEnd, setWeekEnd] = useState<string | null>(null)
+    const [now, setNow] = useState(() => Date.now())
 
     useEffect(() => {
         if (!activeChallengeId) return
         let cancelled = false
         fetchWeeklyLeaderboard(activeChallengeId)
-            .then((b) => { if (!cancelled) setPrize(b.prize) })
-            .catch(() => { if (!cancelled) setPrize(null) })
+            .then((b) => {
+                if (cancelled) return
+                setPrize(b.prize)
+                setWeekEnd(b.weekEnd)
+            })
+            .catch(() => {
+                if (cancelled) return
+                setPrize(null)
+                setWeekEnd(null)
+            })
         return () => { cancelled = true }
     }, [activeChallengeId])
+
+    useEffect(() => {
+        if (!weekEnd) return
+        const t = setInterval(() => setNow(Date.now()), 1_000)
+        return () => clearInterval(t)
+    }, [weekEnd])
+
+    const timeLeft = weekEnd ? formatTimeLeft(weekEnd, now) : null
 
     if (!challenge) return <aside className="pg-rail" aria-label="Current challenge" />
 
@@ -84,9 +133,16 @@ export function ChallengeRail() {
                 <div className="pg-rail-divider" />
 
                 <div className="pg-rail-block">
-                    <div className="pg-rail-label">This week&rsquo;s prize</div>
+                    <div className="pg-rail-label">This challenge&rsquo;s prize</div>
                     <div className="pg-rail-figure">{prize ?? '—'}</div>
                     <div className="pg-rail-sub">Most approved breaks wins.</div>
+                    {timeLeft && weekEnd && (
+                        <>
+                            <div className="pg-rail-label pg-rail-countdown-label">Challenge ends in</div>
+                            <div className="pg-rail-countdown pg-mono">{timeLeft}</div>
+                            <div className="pg-rail-sub">{formatEndDate(weekEnd)}</div>
+                        </>
+                    )}
                 </div>
 
                 <div className="pg-rail-divider" />

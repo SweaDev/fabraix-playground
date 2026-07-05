@@ -228,6 +228,20 @@
   color: var(--text-tertiary);
 }
 
+/* Prize-week countdown: figure-weight presence, tabular digits so the
+   per-second tick doesn't jitter the layout. */
+.pg-rail-countdown-label {
+  margin-top: 0.5rem;
+}
+
+.pg-rail-countdown {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ============================================
    VIEWS: shared scaffolding
    ============================================ */
