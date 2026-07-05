@@ -1,10 +1,5 @@
-fastapi==0.111.0
-uvicorn==0.35.0
-sqlalchemy[asyncio]==2.0.48
-aiosqlite==0.22.1
-litellm==1.89.0
+# The reference agent modules import only these (they are read, not run).
 pydantic==2.12.5
 structlog==22.1.0
 pyyaml==6.0.1
 httpx==0.28.1
-browser-use-sdk==2.0.13

@@ -1,62 +1,73 @@
 /**
  * Layout Styles
- * App structure, navigation, and responsive breakpoints
+ * The app shell: top header, and the full-height content region that holds the
+ * centered content container. The tab nav + challenge-context strip live in
+ * platform.css alongside the rest of the shell chrome.
  */
 
 /* ============================================
-   APP LAYOUT
+   APP SHELL
    ============================================ */
 .app {
+  /* dvh tracks the VISIBLE viewport on mobile (URL bar in or out); the vh line
+     is the fallback for engines without dvh. Identical on desktop. */
   height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.main-layout {
+/* Body: the left challenge rail + the workspace (tab nav + routed content). */
+.pg-body {
   flex: 1;
   display: flex;
-  overflow: hidden;
   min-height: 0;
 }
 
-.left-column {
+.pg-workspace {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   min-width: 0;
-  border-right: 1px solid var(--border);
-}
-
-/* Legacy class for backwards compat */
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
   min-height: 0;
 }
 
-.panels {
+/* Content region: fills the space under the header/tabs/context strip.
+   Views own their own internal scroll (chat scrolls its message list; the
+   page-style views scroll their inner wrapper), so this stays overflow-hidden. */
+.pg-main {
   flex: 1;
   display: flex;
-  overflow: hidden;
   min-height: 0;
+  overflow: hidden;
+}
+
+/* Centered, max-width content column — mirrors clients/app's max-w-6xl. It is
+   full-height so the chat view can fill it; page views scroll inside. */
+.pg-container {
+  flex: 1;
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* ============================================
-   NAVIGATION
+   TOP HEADER
    ============================================ */
 .nav {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
+  padding: 0 1.5rem;
+  height: 3.5rem;
   border-bottom: 1px solid var(--border);
-  background: rgba(10, 10, 11, 0.85);
-  backdrop-filter: blur(12px);
+  background: var(--bg-surface);
 }
 
 .nav-left {
@@ -66,9 +77,11 @@
 }
 
 .logo {
+  font-family: var(--font-sans);
   font-weight: 600;
-  font-size: 0.9rem;
-  letter-spacing: 0.2em;
+  font-size: 0.875rem;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
   color: var(--text-primary);
   text-decoration: none;
 }
@@ -76,157 +89,36 @@
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.75rem;
 }
 
-.nav-link {
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-tertiary);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-.nav-link:hover {
-  color: var(--text-secondary);
-}
-
+/* Login = the primary CTA (near-black); account name = quiet secondary button. */
 .nav-cta {
-  padding: 0.6rem 1.5rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--primary-foreground);
   text-decoration: none;
-  border: 1px solid var(--border-default);
-  transition: all var(--transition-fast);
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
 .nav-cta:hover {
-  background: var(--text-primary);
-  color: var(--bg);
-  border-color: var(--text-primary);
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
-.mobile-menu-btn {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  background: transparent;
-  border: none;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  transition: color var(--transition-fast);
+.nav-cta:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
-.mobile-menu-btn:hover {
-  color: var(--text-primary);
-}
-
-/* ============================================
-   RESPONSIVE
-   ============================================ */
-@media (max-width: 1024px) {
-  .panel-analysis {
-    width: 320px;
-  }
-
-  .challenge-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .challenge-meta {
-    width: 100%;
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 768px) {
-  .main-layout {
-    flex-direction: column;
-    overflow-x: hidden;
-  }
-
-  .left-column {
-    flex: 1;
-    width: 100%;
-    min-width: 0;
-    border-right: none;
-    overflow-x: hidden;
-  }
-
-  .nav-link {
-    display: none;
-  }
-
-  .mobile-menu-btn {
-    display: flex;
-    margin-left: -0.75rem;
-  }
-
-  .challenge-meta {
-    display: none;
-  }
-
-  .nav {
-    padding: 0.75rem 1rem;
-  }
-
-  .challenge-selector-toggle {
-    padding: 0.75rem 1rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .challenge-selector-left {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .challenge-selector-stats {
-    display: none;
-  }
-
-  .challenge-header {
-    padding: 1rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .challenge-info {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .challenge-label {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .chat-input-area {
-    padding: 1rem;
-  }
-
-  .chat-messages {
-    padding: 1rem;
-  }
-
-  .message {
-    max-width: 90%;
-  }
-
-  .processing-steps {
-    max-width: 100%;
-  }
-
-  .initial-loading {
-    max-width: 100%;
-  }
-}
+/* Responsive rules live in styles/responsive.css (imported LAST — a media query
+   here would lose the cascade to the component files imported after this one). */

@@ -21,19 +21,10 @@ export interface Challenge {
     systemPrompt: string
     greeting: string
     deadline?: string
-    stats?: ChallengeStats
 }
 
 /**
- * Challenge statistics
- */
-export interface ChallengeStats {
-    totalAttempts: number
-    successRate: string
-}
-
-/**
- * Challenge list item for selector
+ * Challenge list item
  */
 export interface ChallengeListItem {
     id: string
@@ -41,28 +32,4 @@ export interface ChallengeListItem {
     difficulty: Difficulty
     locked: boolean
     comingSoon?: boolean
-    stats?: {
-        totalAttempts: string
-        successRate: string
-        bestTime: string
-    }
-}
-
-/**
- * Global stats display
- */
-export interface GlobalStats {
-    totalAttempts: string
-    successRate: string
-    bestTime: string
-}
-
-/**
- * Leaderboard entry from API
- */
-export interface LeaderboardEntry {
-    username: string
-    timeSeconds: number
-    time: string
-    createdAt: string
 }

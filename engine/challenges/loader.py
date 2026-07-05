@@ -29,12 +29,6 @@ def _load_challenge(challenge_dir: Path) -> ChallengeConfig | None:
         with open(prompt_path) as f:
             config_data["system_prompt"] = f.read()
 
-    # Optional inbox seed data (data-exfil challenges seed the shared inbox).
-    seed_path = challenge_dir / "inbox_seed.yaml"
-    if seed_path.exists():
-        with open(seed_path) as f:
-            config_data["inbox_seed"] = yaml.safe_load(f) or []
-
     config_data["slug"] = challenge_dir.name
 
     return ChallengeConfig(**config_data)

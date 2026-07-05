@@ -22,10 +22,21 @@ export function ChatInput({
     isLoading,
     inputRef,
 }: ChatInputProps) {
-    // Focus input on mount
+    // Focus input on mount — desktop only; on touch devices an uninvited focus
+    // pops the software keyboard over half the viewport.
     useEffect(() => {
-        inputRef.current?.focus()
+        if (window.matchMedia('(pointer: fine)').matches) {
+            inputRef.current?.focus()
+        }
     }, [inputRef])
+
+    // The auto-resize grows the textarea while typing; when the value is
+    // cleared (message sent, restart), collapse it back to one row.
+    useEffect(() => {
+        if (value === '' && inputRef.current) {
+            inputRef.current.style.height = 'auto'
+        }
+    }, [value, inputRef])
 
     // Handle input change with auto-resize
     const handleChange = useCallback(

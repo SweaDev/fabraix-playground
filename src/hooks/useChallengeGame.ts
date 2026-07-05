@@ -6,8 +6,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import type {
     Message,
-    Guardrail,
-    GuardrailState,
     AnalysisStatus,
     SSEEvent,
     SearchResultData,
@@ -22,7 +20,6 @@ import {
     createMessage,
     serializeMessages,
     deserializeMessages,
-    createInitialGuardrails,
 } from '@/utils'
 import { DISPLAYABLE_STEP_TYPES } from '@/constants'
 
@@ -32,7 +29,11 @@ import { DISPLAYABLE_STEP_TYPES } from '@/constants'
 
 interface UseChallengeGameOptions {
     challengeId: string
-    guardrails: Guardrail[]
+    /**
+     * Opaque variant id selecting which randomly-named model the player faces.
+     * `undefined` uses the server default. Changing it restarts on the new model.
+     */
+    variantId?: string
 }
 
 interface UseChallengeGameReturn {
@@ -47,11 +48,11 @@ interface UseChallengeGameReturn {
     attempts: number
     elapsedTime: number
     hasWon: boolean
+    sessionId: string | null
 
     // Analysis state
     status: AnalysisStatus
     reason: string
-    activeGuardrails: GuardrailState[]
 
     // Processing state
     currentStatus: string | null
@@ -66,6 +67,8 @@ interface UseChallengeGameReturn {
     sendMessage: () => void
     resetGame: () => void
     switchChallenge: (newChallengeId: string) => void
+    /** Restart the current session against a different (opaque) model variant. */
+    changeVariant: (variantId: string | undefined) => void
     setInputValue: (value: string) => void
     handleKeyDown: (e: React.KeyboardEvent) => void
     formatTime: (seconds: number) => string
@@ -77,7 +80,7 @@ interface UseChallengeGameReturn {
 
 export function useChallengeGame({
     challengeId,
-    guardrails,
+    variantId,
 }: UseChallengeGameOptions): UseChallengeGameReturn {
     // ========================================================================
     // State
@@ -99,7 +102,7 @@ export function useChallengeGame({
     const timer = useTimer()
     const storage = useSessionStorage()
     const processing = useProcessingSteps()
-    const analysis = useAnalysis({ guardrails })
+    const analysis = useAnalysis()
 
     // ========================================================================
     // Refs
@@ -108,6 +111,10 @@ export function useChallengeGame({
     const inputRef = useRef<HTMLTextAreaElement>(null)
     const initializedRef = useRef(false)
     const abortControllerRef = useRef<AbortController | null>(null)
+    // Latest selected model variant, read by restart/switch without re-triggering
+    // the init effect (which restores from storage) on every picker change.
+    const variantRef = useRef<string | undefined>(variantId)
+    variantRef.current = variantId
 
     // ========================================================================
     // Initialization
@@ -122,11 +129,16 @@ export function useChallengeGame({
         async function initializeSession() {
             setIsInitializing(true)
 
-            // Try to restore from storage
+            // Try to restore from storage — but only a session that ran against
+            // the currently-selected model; a stale run on another model would
+            // silently misattribute the conversation.
             const saved = storage.loadSession()
-            if (saved?.sessionId) {
+            if (saved?.sessionId && saved.variantId === variantRef.current) {
                 restoreFromStorage(saved)
                 return
+            }
+            if (saved?.sessionId) {
+                storage.clearSession()
             }
 
             // Start new session
@@ -140,16 +152,21 @@ export function useChallengeGame({
             setMessages(deserializeMessages(saved.messages))
             setAttempts(saved.attempts)
             if (saved.hasWon) setHasWon(true)
-            analysis.setActiveGuardrails(saved.activeGuardrails)
             analysis.setStatus(saved.status)
             analysis.setReason(saved.reason)
-            timer.start(new Date(saved.startTime))
+            // An already-solved session is frozen at its recorded solve time;
+            // an in-progress one resumes counting from its original start.
+            if (saved.hasWon) {
+                timer.restore(saved.elapsedTime, new Date(saved.startTime), false)
+            } else {
+                timer.start(new Date(saved.startTime))
+            }
             setIsInitializing(false)
         }
 
         async function startNewSession() {
             try {
-                const response = await startSession(challengeId)
+                const response = await startSession(challengeId, undefined, variantRef.current)
                 setSessionId(response.sessionId)
 
                 const greeting = createMessage('assistant', response.greeting)
@@ -165,9 +182,9 @@ export function useChallengeGame({
                     attempts: 0,
                     startTime: startTime.toISOString(),
                     elapsedTime: 0,
-                    activeGuardrails: createInitialGuardrails(guardrails),
                     status: 'pending',
                     reason: '',
+                    variantId: variantRef.current,
                 })
             } catch (error) {
                 console.error('Failed to start session:', error)
@@ -180,7 +197,7 @@ export function useChallengeGame({
                 setIsInitializing(false)
             }
         }
-    }, [challengeId, guardrails, storage, timer, analysis])
+    }, [challengeId, storage, timer, analysis])
 
     // Cleanup: cancel pending requests on unmount
     useEffect(() => {
@@ -212,17 +229,15 @@ export function useChallengeGame({
 
             setMessages(messagesWithResponse)
 
-            // Track win state
+            // Track win state — freeze the timer so the recorded solve time
+            // (shown in the win banner) stops counting up after the solve.
             if (result.success) {
                 setHasWon(true)
+                timer.stop()
             }
 
             // Update analysis state
-            const newGuardrails = analysis.updateAnalysis(
-                newStatus,
-                result.reason ?? '',
-                result.tool_calls
-            )
+            analysis.updateAnalysis(newStatus, result.reason ?? '')
 
             // Persist session
             const wonNow = !!result.success
@@ -232,16 +247,16 @@ export function useChallengeGame({
                 attempts: newAttempts,
                 startTime: timer.startTime?.toISOString() ?? new Date().toISOString(),
                 elapsedTime: timer.elapsedTime,
-                activeGuardrails: newGuardrails,
                 status: newStatus,
                 reason: result.reason ?? '',
                 hasWon: hasWon || wonNow,
+                variantId: variantRef.current,
             })
 
             // Clear live processing steps now that they're attached to the message
             processing.clearStatus()
         },
-        [sessionId, timer, storage, analysis, processing]
+        [sessionId, timer, storage, analysis, processing, hasWon]
     )
 
     // ========================================================================
@@ -328,7 +343,9 @@ export function useChallengeGame({
 
         setIsRestarting(true)
         try {
-            const response = await restartSession(sessionId)
+            // Keep the currently-selected model on a plain restart (omitting
+            // variantId server-side preserves the session's current model).
+            const response = await restartSession(sessionId, variantRef.current)
 
             // Clear storage
             storage.clearSession()
@@ -345,7 +362,21 @@ export function useChallengeGame({
             analysis.resetAnalysis()
             processing.clearStatus()
             timer.reset()
-            timer.start()
+            const startTime = new Date()
+            timer.start(startTime)
+
+            // Persist the restarted session immediately (mirrors startNewSession /
+            // switchChallenge) so a reload before the first message doesn't orphan it.
+            storage.saveSession({
+                sessionId: response.sessionId,
+                messages: serializeMessages([greeting]),
+                attempts: 0,
+                startTime: startTime.toISOString(),
+                elapsedTime: 0,
+                status: 'pending',
+                reason: '',
+                variantId: variantRef.current,
+            })
 
             inputRef.current?.focus()
         } catch (error) {
@@ -367,12 +398,13 @@ export function useChallengeGame({
         setMessages([])
         setInputValue('')
         setAttempts(0)
+        setHasWon(false)
         analysis.resetAnalysis()
         processing.clearStatus()
         timer.reset()
 
         try {
-            const response = await startSession(newChallengeId)
+            const response = await startSession(newChallengeId, undefined, variantRef.current)
             setSessionId(response.sessionId)
 
             const greeting = createMessage('assistant', response.greeting)
@@ -387,9 +419,9 @@ export function useChallengeGame({
                 attempts: 0,
                 startTime: startTime.toISOString(),
                 elapsedTime: 0,
-                activeGuardrails: createInitialGuardrails(guardrails),
                 status: 'pending',
                 reason: '',
+                variantId: variantRef.current,
             })
         } catch (error) {
             console.error('Failed to switch challenge:', error)
@@ -404,7 +436,17 @@ export function useChallengeGame({
                 inputRef.current?.focus()
             })
         }
-    }, [guardrails, storage, timer, analysis, processing])
+    }, [storage, timer, analysis, processing])
+
+    /**
+     * Switch the faced model: restart the live session onto the chosen variant so
+     * the whole conversation runs against one model. Reuses the restart path
+     * (which reads variantRef) after updating the ref to the new selection.
+     */
+    const changeVariant = useCallback((nextVariantId: string | undefined) => {
+        variantRef.current = nextVariantId
+        void resetGame()
+    }, [resetGame])
 
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent) => {
@@ -432,11 +474,11 @@ export function useChallengeGame({
         attempts,
         elapsedTime: timer.elapsedTime,
         hasWon,
+        sessionId,
 
         // Analysis state
         status: analysis.status,
         reason: analysis.reason,
-        activeGuardrails: analysis.activeGuardrails,
 
         // Processing state
         currentStatus: processing.currentStatus,
@@ -451,6 +493,7 @@ export function useChallengeGame({
         sendMessage,
         resetGame,
         switchChallenge,
+        changeVariant,
         setInputValue,
         handleKeyDown,
         formatTime: timer.formatTime,

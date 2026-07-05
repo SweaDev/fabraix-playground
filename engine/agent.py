@@ -142,7 +142,7 @@ class PlaygroundAgent:
             data={"content": result["content"]},
         )
 
-        # Check if the access code was revealed in the response
+        # Check if the challenge's protected secret was revealed in the response
         result["success"] = is_successful_extraction(secret, result["content"], check_for_secret)
 
         return result
@@ -224,16 +224,10 @@ class PlaygroundAgent:
             info["status_message"] = f'Searching the web for "{query}"'
             info["icon"] = "search"
             info["query"] = query
-        elif tool_name == "search_docs":
-            query = tool_args.get("query", "")
-            info["display_name"] = "Documentation Search"
-            info["status_message"] = f'Searching Fabraix docs for "{query}"'
-            info["icon"] = "file-text"
-            info["query"] = query
-        elif tool_name == "get_pricing":
-            info["display_name"] = "Pricing Lookup"
-            info["status_message"] = "Looking up pricing information"
-            info["icon"] = "dollar-sign"
+        elif tool_name == "about_fabraix":
+            info["display_name"] = "About Fabraix"
+            info["status_message"] = "Looking up Fabraix info"
+            info["icon"] = "info"
         elif tool_name == "reveal_access_code":
             info["display_name"] = "Access Code Check"
             info["status_message"] = "Checking access code"
@@ -245,21 +239,6 @@ class PlaygroundAgent:
             info["status_message"] = f"Opening browser: {truncated_task}"
             info["icon"] = "globe"
             info["task"] = task
-        elif tool_name == "send_email":
-            subject = tool_args.get("subject", "")
-            info["display_name"] = "Send Email"
-            info["status_message"] = f'Sending email: "{subject}"' if subject else "Sending email"
-            info["icon"] = "mail"
-        elif tool_name == "read_inbox":
-            label = tool_args.get("label", "")
-            info["display_name"] = "Read Inbox"
-            info["status_message"] = f'Reading inbox with label "{label}"'
-            info["icon"] = "inbox"
-        elif tool_name == "submit_leaderboard":
-            username = tool_args.get("username", "")
-            info["display_name"] = "Leaderboard"
-            info["status_message"] = f'Adding "{username}" to the leaderboard'
-            info["icon"] = "trophy"
 
         return info
 
@@ -333,7 +312,6 @@ class PlaygroundAgent:
                     "display_name": tool_info["display_name"],
                     "blocked": tool_result["blocked"],
                     "success": not tool_result["blocked"],
-                    "risk_score": tool_result.get("risk_score"),
                 },
             )
 
@@ -406,7 +384,6 @@ class PlaygroundAgent:
                 "call_id": call_id,
                 "result": f"Tool '{tool_name}' is not available.",
                 "blocked": True,
-                "risk_score": None,
                 "reasoning": "Tool not available for this challenge",
             }
 
@@ -417,28 +394,24 @@ class PlaygroundAgent:
             data={"name": tool_name, "args": tool_args},
         )
 
-        # Skip guardrails check for submit_leaderboard (internal system tool).
-        if tool_name == "submit_leaderboard":
-            check_blocked = False
-            check_risk_score: float | None = None
-            check_reasoning = "Internal system tool - guardrails skipped"
-        else:
-            decision = await self.platform.guardrail.check_action(
-                session_id=session_id or "",
-                trace_id=trace_id,
-                tool_name=tool_name,
-                tool_args=tool_args,
-                context={"tool": tool_name, "args": tool_args},
-            )
-            check_blocked = decision.blocked
-            check_risk_score = decision.risk_score
-            check_reasoning = decision.reasoning
+        # Every tool call is evaluated by the guardrail judge — the defense covers
+        # all of the agent's actions, not just the one that reveals the secret.
+        # (A deployment may, as a cost optimization, only judge the secret-
+        # revealing tool; that's a backend detail, not the design shown here.)
+        decision = await self.platform.guardrail.check_action(
+            session_id=session_id or "",
+            trace_id=trace_id,
+            tool_name=tool_name,
+            tool_args=tool_args,
+            context={"tool": tool_name, "args": tool_args},
+        )
+        check_blocked = decision.blocked
+        check_reasoning = decision.reasoning
 
         if check_blocked:
             logger.info(
                 "playground.tool_blocked",
                 tool=tool_name,
-                risk_score=check_risk_score,
                 reasoning=check_reasoning,
             )
             return {
@@ -447,7 +420,6 @@ class PlaygroundAgent:
                 "call_id": call_id,
                 "result": None,
                 "blocked": True,
-                "risk_score": check_risk_score,
                 "reasoning": check_reasoning,
             }
 
@@ -462,17 +434,12 @@ class PlaygroundAgent:
                 "call_id": call_id,
                 "result": f"Unknown tool: {tool_name}",
                 "blocked": False,
-                "risk_score": check_risk_score,
                 "reasoning": check_reasoning,
             }
 
         # Special handling for reveal_access_code - inject the secret
         if tool_name == "reveal_access_code":
             tool_args["access_code"] = secret
-
-        # Special handling for submit_leaderboard - inject session_id
-        if tool_name == "submit_leaderboard" and session_id:
-            tool_args["session_id"] = session_id
 
         try:
             result = await tool_fn(self.platform, **tool_args)
@@ -510,6 +477,5 @@ class PlaygroundAgent:
             "result": result,
             "search_results": search_results,
             "blocked": False,
-            "risk_score": check_risk_score,
             "reasoning": check_reasoning,
         }

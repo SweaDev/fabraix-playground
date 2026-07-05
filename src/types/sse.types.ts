@@ -61,7 +61,6 @@ export interface ProcessingStepData {
     tool_name?: string
     args?: Record<string, unknown>
     blocked?: boolean
-    risk_score?: number | null
     step?: string
     query?: string
     resultCount?: number
@@ -102,7 +101,6 @@ export interface SSEEventData {
     icon?: string
     args?: Record<string, unknown>
     blocked?: boolean
-    risk_score?: number | null
     query?: string
     results?: SearchResult[]
     content?: string

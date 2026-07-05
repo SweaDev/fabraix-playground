@@ -2,7 +2,9 @@ import { useCallback } from 'react'
 import type { SessionData } from '@/types'
 import { validateSessionData } from '@/utils'
 
-const STORAGE_KEY = 'playground_session'
+/** sessionStorage key for the in-progress game. Exported so the auth flow can
+ * clear it on login (a fresh, account-owned session must start from scratch). */
+export const SESSION_STORAGE_KEY = 'playground_session'
 
 interface UseSessionStorageReturn {
     /** Load session data from storage */
@@ -22,7 +24,7 @@ interface UseSessionStorageReturn {
 export function useSessionStorage(): UseSessionStorageReturn {
     const loadSession = useCallback((): SessionData | null => {
         try {
-            const saved = sessionStorage.getItem(STORAGE_KEY)
+            const saved = sessionStorage.getItem(SESSION_STORAGE_KEY)
             if (!saved) return null
 
             const parsed = JSON.parse(saved)
@@ -30,28 +32,28 @@ export function useSessionStorage(): UseSessionStorageReturn {
 
             if (!validated) {
                 // Invalid data - clear corrupted storage
-                sessionStorage.removeItem(STORAGE_KEY)
+                sessionStorage.removeItem(SESSION_STORAGE_KEY)
                 return null
             }
 
             return validated
         } catch (e) {
             console.error('Failed to load session:', e)
-            sessionStorage.removeItem(STORAGE_KEY)
+            sessionStorage.removeItem(SESSION_STORAGE_KEY)
             return null
         }
     }, [])
 
     const saveSession = useCallback((data: SessionData): void => {
         try {
-            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data))
         } catch (e) {
             console.error('Failed to save session:', e)
         }
     }, [])
 
     const clearSession = useCallback((): void => {
-        sessionStorage.removeItem(STORAGE_KEY)
+        sessionStorage.removeItem(SESSION_STORAGE_KEY)
     }, [])
 
     return {

@@ -2,13 +2,37 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Apply the saved (or OS-preferred) theme BEFORE first paint so there's no
+         flash of the wrong theme. Light is the brand default. -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('pg_theme');
+          if (t !== 'light' && t !== 'dark') {
+            t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+          }
+          if (t === 'dark') document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <!-- Fonts load from the HTML (with preconnect) instead of a render-blocking
+         @import buried in the CSS bundle — faster first paint on slow mobile. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer" />
     <meta name="description" content="Fabraix Playground - Test your prompt injection skills against AI agents" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#faf8f2" />
     <title>Playground — Fabraix</title>
   </head>
-  <body class="dark">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

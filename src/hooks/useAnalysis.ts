@@ -1,88 +1,43 @@
 /**
- * Hook for managing analysis state (status, reason, guardrails)
+ * Hook for managing the per-message guardrail verdict: status + reason.
+ *
+ * The static "active guardrails" list was retired with the SAFE-panel shrink, so
+ * this now tracks only the one thing the panel renders — did the guardrail hold
+ * (`status`) and why (`reason`).
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react'
-import type { AnalysisStatus, Guardrail, GuardrailState, ToolCall } from '@/types'
-import { createInitialGuardrails, updateTriggeredGuardrails } from '@/utils'
-
-interface UseAnalysisOptions {
-    guardrails: Guardrail[]
-}
+import { useState, useCallback } from 'react'
+import type { AnalysisStatus } from '@/types'
 
 interface UseAnalysisReturn {
     status: AnalysisStatus
     reason: string
-    activeGuardrails: GuardrailState[]
-    updateAnalysis: (
-        newStatus: AnalysisStatus,
-        newReason: string,
-        toolCalls?: ToolCall[]
-    ) => GuardrailState[]
+    updateAnalysis: (newStatus: AnalysisStatus, newReason: string) => void
     resetAnalysis: () => void
     setStatus: React.Dispatch<React.SetStateAction<AnalysisStatus>>
     setReason: React.Dispatch<React.SetStateAction<string>>
-    setActiveGuardrails: React.Dispatch<React.SetStateAction<GuardrailState[]>>
 }
 
-/**
- * Hook for managing analysis status, reason, and guardrail state
- */
-export function useAnalysis({ guardrails }: UseAnalysisOptions): UseAnalysisReturn {
+export function useAnalysis(): UseAnalysisReturn {
     const [status, setStatus] = useState<AnalysisStatus>('pending')
     const [reason, setReason] = useState('')
-    const [activeGuardrails, setActiveGuardrails] = useState<GuardrailState[]>(() =>
-        createInitialGuardrails(guardrails)
-    )
 
-    // Track if guardrails have been initialized to prevent duplicate initialization
-    const initializedRef = useRef(guardrails.length > 0)
-
-    // Sync activeGuardrails when guardrails prop changes (only once after initial load)
-    useEffect(() => {
-        if (!initializedRef.current && guardrails.length > 0) {
-            initializedRef.current = true
-            setActiveGuardrails(createInitialGuardrails(guardrails))
-        }
-    }, [guardrails])
-
-    const updateAnalysis = useCallback(
-        (
-            newStatus: AnalysisStatus,
-            newReason: string,
-            toolCalls?: ToolCall[]
-        ): GuardrailState[] => {
-            setStatus(newStatus)
-            setReason(newReason)
-
-            if (newStatus === 'blocked') {
-                const newGuardrails = updateTriggeredGuardrails(
-                    activeGuardrails,
-                    toolCalls,
-                )
-                setActiveGuardrails(newGuardrails)
-                return newGuardrails
-            }
-
-            return activeGuardrails
-        },
-        [activeGuardrails]
-    )
+    const updateAnalysis = useCallback((newStatus: AnalysisStatus, newReason: string): void => {
+        setStatus(newStatus)
+        setReason(newReason)
+    }, [])
 
     const resetAnalysis = useCallback(() => {
         setStatus('pending')
         setReason('')
-        setActiveGuardrails(createInitialGuardrails(guardrails))
-    }, [guardrails])
+    }, [])
 
     return {
         status,
         reason,
-        activeGuardrails,
         updateAnalysis,
         resetAnalysis,
         setStatus,
         setReason,
-        setActiveGuardrails,
     }
 }

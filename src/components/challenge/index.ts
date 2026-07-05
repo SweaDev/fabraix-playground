@@ -5,12 +5,10 @@
  * - Header/Navigation: ChallengeHeader, ChallengeSelector
  * - Chat Interface: ChatPanel, MessageList, MessageBubble, ChatInput
  * - Processing Display: ProcessingSteps, ProcessingStepItem
- * - Analysis: AnalysisPanel
  */
 
 // Header components
 export { ChallengeHeader } from './ChallengeHeader'
-export { ChallengeSelector } from './ChallengeSelector'
 
 // Chat components
 export { ChatPanel } from './ChatPanel'
@@ -22,5 +20,5 @@ export { ChatInput } from './ChatInput'
 export { ProcessingSteps } from './ProcessingSteps'
 export { ProcessingStepItem } from './ProcessingStepItem'
 
-// Analysis components
-export { AnalysisPanel } from './AnalysisPanel'
+// Model selection
+export { ModelPicker } from './ModelPicker'

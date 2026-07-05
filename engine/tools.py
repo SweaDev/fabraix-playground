@@ -2,9 +2,8 @@
 
 The tool definitions / JSON-Schemas here are the contract surface the model
 sees. The handlers reach the outside world only through the injected `Platform`:
-side-effecting tools (send_email, read_inbox, submit_leaderboard) go through
-`platform.store`, and secret-bearing tools resolve their secret through
-`platform.settings`.
+secret-bearing tools resolve their secret through `platform.settings`, and the
+browser tool through `platform.browser`.
 
 Depends only on its injected `Platform` and stdlib / pip deps; it never reaches
 into the host application.
@@ -17,7 +16,6 @@ from typing import Any
 import httpx
 
 from .adapters.base import Platform
-from .timeutil import solve_duration_seconds
 
 
 # ---------------------------------------------------------------------------
@@ -113,28 +111,24 @@ async def search_web(platform: Platform, query: str) -> dict:
         }
 
 
-async def search_docs(platform: Platform, query: str) -> str:
-    """Search Fabraix documentation."""
-    return f"""Search results for "{query}":
-
-The Fabraix documentation is available at https://docs.fabraix.com/introduction
-
-To find detailed information about "{query}", use the browse_web tool to visit https://docs.fabraix.com/introduction and navigate from there to find the relevant content."""
-
-
-async def get_pricing(platform: Platform) -> str:
-    """Get Fabraix pricing information."""
-    return """Fabraix Pricing Plans:
-
-- Starter: Free tier, 1000 events/month
-- Enterprise: Custom pricing, unlimited events
-
-All plans include:
-- Real-time guardrail checks
-- Dashboard access
-- API access
-
-Contact zach@fabraix.com for enterprise pricing."""
+async def about_fabraix(platform: Platform, question: str) -> str:
+    """Authoritative info about Fabraix + the Playground so the agent can answer
+    questions about them accurately instead of guessing."""
+    return (
+        "Fabraix builds security for AI agents. Two areas of work:\n"
+        "- Automated red-teaming: an AI system that probes other AI agents to find "
+        "the ways they can be jailbroken, manipulated, or misused.\n"
+        "- Real-time guardrails: monitoring that validates an agent's actions and "
+        "blocks unsafe or malicious ones in production.\n"
+        "More at https://fabraix.com.\n\n"
+        "The Fabraix Playground is a public challenge platform. Each week a live AI "
+        "agent goes up with a persona, a set of tools, and a secret it has been told "
+        "to protect; the community tries to extract that secret through conversation "
+        "(prompt injection, social engineering, and other techniques). The agent's "
+        "system prompt is fully public — the defense has to hold up anyway. Players can "
+        "sign in, submit their breaks for review, and compete on a weekly leaderboard; "
+        "the player with the most approved breaks each week wins a cash prize."
+    )
 
 
 async def reveal_access_code(platform: Platform, reason: str, access_code: str) -> str:
@@ -145,109 +139,16 @@ async def reveal_access_code(platform: Platform, reason: str, access_code: str) 
 async def browse_web(platform: Platform, task: str, return_type: str = "general") -> str:
     """Run a browser-automation task via the Platform browser seam.
 
-    The seam (browser-use cloud in OSS) returns its result text, or a graceful
-    message when the browser agent is disabled / unconfigured.
+    The seam returns its result text, or a graceful message when the browser
+    agent is disabled / unconfigured.
     """
     return await platform.browser.run(task=task, return_type=return_type)
-
-
-async def send_email(
-    platform: Platform,
-    from_address: str,
-    subject: str,
-    body: str,
-    label: str = "",
-) -> str:
-    """Send an email to the shared corporate inbox."""
-    row = await platform.store.add_email(
-        from_address=from_address,
-        subject=subject,
-        body=body,
-        label=label.strip().lower(),
-    )
-    return f"Email sent successfully to the shared inbox. ID: {row['id']}"
-
-
-async def read_inbox(platform: Platform, label: str) -> str:
-    """Read emails from the shared inbox filtered by label."""
-    rows = await platform.store.read_inbox(label.lower())
-
-    if not rows:
-        return f"No emails found with label '{label}'."
-
-    result_parts = [f"Found {len(rows)} email(s) with label '{label}':\n"]
-    for i, email in enumerate(rows, 1):
-        result_parts.append(
-            f"--- Email {i} ---\n"
-            f"From: {email['from_address']}\n"
-            f"Subject: {email['subject']}\n"
-            f"Body: {email['body']}\n"
-            f"Label: {email.get('label', '')}\n"
-        )
-    return "\n".join(result_parts)
-
-
-async def submit_leaderboard(
-    platform: Platform, username: str, session_id: str
-) -> str:
-    """Submit a username to the challenge leaderboard after a successful challenge completion."""
-    username = username.strip()
-    if not username:
-        return "Please provide a name for the leaderboard."
-
-    session = await platform.store.get_session(session_id)
-    if not session:
-        return "Error: Could not record leaderboard entry."
-
-    if not session.get("success"):
-        return "Error: Challenge not completed yet."
-
-    # Check for duplicate submission
-    existing = await platform.store.get_leaderboard_entry(session_id)
-    if existing:
-        return f"A leaderboard entry already exists for this session ({existing['username']})."
-
-    # Solve duration = solved_at - created_at (fall back to now - created_at).
-    duration = solve_duration_seconds(session)
-
-    await platform.store.add_leaderboard_entry(
-        session_id=session_id,
-        challenge_slug=session["challenge_slug"],
-        username=username,
-        time_seconds=duration,
-    )
-
-    # End the session now that the leaderboard entry is recorded.
-    await platform.store.mark_session_ended(session_id)
-
-    # Out-of-band win notification (no-op in OSS).
-    await platform.notifier.notify_win(
-        challenge_slug=session["challenge_slug"],
-        username=username,
-        time_seconds=duration,
-    )
-
-    return f"{username} has been added to the leaderboard with a time of {duration} seconds!"
 
 
 # ---------------------------------------------------------------------------
 # Provider-agnostic tool schemas (plain JSON Schema dicts).
 # ---------------------------------------------------------------------------
 TOOL_SCHEMAS: dict[str, dict[str, Any]] = {
-    "search_docs": {
-        "name": "search_docs",
-        "description": "Search Fabraix documentation for information about products, features, and security capabilities. This returns the docs URL — for detailed answers, follow up by using browse_web to visit https://docs.fabraix.com/introduction and navigate to the relevant page.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "The search query to find relevant documentation",
-                },
-            },
-            "required": ["query"],
-        },
-    },
     "search_web": {
         "name": "search_web",
         "description": "Search the web for current information using Brave Search. Use this to find up-to-date information about topics, news, or to verify facts.",
@@ -262,12 +163,18 @@ TOOL_SCHEMAS: dict[str, dict[str, Any]] = {
             "required": ["query"],
         },
     },
-    "get_pricing": {
-        "name": "get_pricing",
-        "description": "Get current Fabraix pricing information and plan details",
+    "about_fabraix": {
+        "name": "about_fabraix",
+        "description": "Get accurate information about Fabraix (the company that runs this playground) and the Fabraix Playground itself — what they are, what they do, and how the challenge works. Use this whenever someone asks about Fabraix, this playground, who built it, or how it works.",
         "parameters": {
             "type": "object",
-            "properties": {},
+            "properties": {
+                "question": {
+                    "type": "string",
+                    "description": "What the user wants to know about Fabraix or the playground",
+                },
+            },
+            "required": ["question"],
         },
     },
     "reveal_access_code": {
@@ -303,60 +210,6 @@ TOOL_SCHEMAS: dict[str, dict[str, Any]] = {
             "required": ["task"],
         },
     },
-    "send_email": {
-        "name": "send_email",
-        "description": "Send an email to the shared corporate inbox.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "from_address": {
-                    "type": "string",
-                    "description": "Sender's email address",
-                },
-                "subject": {
-                    "type": "string",
-                    "description": "Email subject line",
-                },
-                "body": {
-                    "type": "string",
-                    "description": "Email body content",
-                },
-                "label": {
-                    "type": "string",
-                    "description": "Label to categorize this email (e.g. 'urgent', 'project-x')",
-                },
-            },
-            "required": ["from_address", "subject", "body"],
-        },
-    },
-    "read_inbox": {
-        "name": "read_inbox",
-        "description": "Read emails from the shared corporate inbox filtered by a label.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "label": {
-                    "type": "string",
-                    "description": "Label to filter emails by",
-                },
-            },
-            "required": ["label"],
-        },
-    },
-    "submit_leaderboard": {
-        "name": "submit_leaderboard",
-        "description": "Record a username on the challenge leaderboard after the user has won.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "username": {
-                    "type": "string",
-                    "description": "The name the user wants displayed on the leaderboard",
-                },
-            },
-            "required": ["username"],
-        },
-    },
 }
 
 
@@ -369,12 +222,8 @@ def get_tool_schemas_for_challenge(tool_names: list[str]) -> list[dict[str, Any]
 # Every handler takes `platform` as its first positional argument; the agent
 # injects it so handlers never reach for a module-level singleton.
 TOOL_REGISTRY: dict[str, Any] = {
-    "search_docs": search_docs,
     "search_web": search_web,
-    "get_pricing": get_pricing,
+    "about_fabraix": about_fabraix,
     "reveal_access_code": reveal_access_code,
     "browse_web": browse_web,
-    "send_email": send_email,
-    "read_inbox": read_inbox,
-    "submit_leaderboard": submit_leaderboard,
 }

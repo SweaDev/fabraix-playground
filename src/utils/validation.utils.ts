@@ -43,9 +43,6 @@ export function isValidSessionData(data: unknown): data is SessionData {
     if (!Array.isArray(d.messages)) {
         return false
     }
-    if (!Array.isArray(d.activeGuardrails)) {
-        return false
-    }
 
     // Validate status enum
     if (!VALID_ANALYSIS_STATUSES.includes(d.status as typeof VALID_ANALYSIS_STATUSES[number])) {

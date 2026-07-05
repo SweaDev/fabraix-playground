@@ -4,7 +4,7 @@ AI agents are reshaping how we work. The repetitive, mechanical parts, the work 
 
 The ultimate enabler for all of it is trust. None of it scales until people can hand real tasks to an agent and know it will do what it should — and nothing it shouldn't. That trust can't be built by any single team behind closed doors. It has to be earned collectively, in the open, by a community of researchers, engineers, and the genuinely curious, all pressure-testing the same systems and sharing what they find.
 
-The Playground exists to make that effort tangible. Every challenge deploys a live AI agent, not a toy scenario or a mocked-up document parser, but an agent with real capabilities, and opens it up for the community to break. System prompts are published. Challenge configs are versioned in the open. When someone finds a way through, the winning technique is documented for everyone to learn from. That published knowledge forces better defenses, which invite harder challenges, which produce deeper understanding.
+The Playground exists to make that effort tangible. Every challenge deploys a live AI agent, not a toy scenario or a mocked-up document parser, but an agent with real capabilities, and opens it up for the community to break. System prompts are published. Challenge configs are versioned in the open. Each week a fresh challenge goes live, and the open, collective effort to break it forces better defenses, which invite harder challenges, which produce deeper understanding.
 
 **[playground.fabraix.com](https://playground.fabraix.com)**
 
@@ -12,25 +12,22 @@ The Playground exists to make that effort tangible. Every challenge deploys a li
 
 ## How it works
 
-Each challenge puts a live AI agent in front of you with a specific persona, a set of tools (web search, browsing, and more), and something it's been instructed to protect. The system prompt is fully visible. Your job is to find a way past the guardrails anyway.
+Each challenge puts a live AI agent in front of you with a specific persona, a set of tools (web search, browsing, and more), and a secret it's been instructed to protect. The system prompt is fully visible. Your job is to get past the guardrails and extract the secret anyway.
 
-The community drives what gets tested:
+- **Play instantly** — start sending messages right away, no account required.
+- **Pick your opponent** — choose which model you face from a set of named challengers; each one is a different defender under the hood.
+- **Sign in to compete** — log in with Google *before* you solve to submit your breaks under a display name you choose.
+- **Most breaks wins** — each week, the player with the most *approved* breaks wins a cash prize, then a fresh challenge goes live. Every submission is reviewed before it lands on the leaderboard.
 
-1. Anyone [proposes a challenge](CONTRIBUTING.md) — the scenario, the agent, the objective
-2. The community votes
-3. The top-voted challenge is considered for go live with a ticking clock
-4. The fastest successful jailbreak wins
-5. The winning technique gets published — approach, reasoning, everything
-
-That last step matters most. Every technique we publish advances what the community collectively understands about how AI agents fail — and how to build ones that don't.
+The platform has dedicated views for the current challenge, the live chat, the weekly leaderboard, your previous chats, your submissions and their review status, and the prizes.
 
 ## Project structure
 
-- [`/src`](src/) — React frontend (TypeScript, Vite, Tailwind)
-- [`/engine`](engine/) — self-hostable FastAPI backend + agent runtime ([setup](engine/README.md))
+- [`/src`](src/) — React frontend (TypeScript, Vite, Tailwind) — the app you play in
+- [`/engine`](engine/) — a reference implementation of how the defender agent is wired ([read it](engine/README.md))
 - [`/challenges`](challenges/) — every challenge config and system prompt, versioned and open
 
-Guardrail evaluation runs server-side in the engine to prevent client-side tampering.
+Guardrail evaluation runs server-side to prevent client-side tampering.
 
 ## Run locally
 
@@ -39,11 +36,7 @@ npm install
 npm run dev
 ```
 
-Connects to the live API by default. To develop against a local backend:
-
-```bash
-VITE_API_URL=http://localhost:8000/v1 npm run dev
-```
+The app connects to the live Fabraix API by default.
 
 ## Get involved
 

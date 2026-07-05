@@ -221,7 +221,6 @@ const handleToolComplete: EventHandler = (event, state) => {
                 data: {
                     ...step.data,
                     blocked: event.data.blocked,
-                    risk_score: event.data.risk_score,
                 },
             }
         }),

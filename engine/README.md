@@ -1,95 +1,48 @@
-# Fabraix Playground — Backend (self-hostable)
+# Fabraix Playground — Defender Agent (reference)
 
-A self-contained FastAPI app + agent runtime for the Fabraix Playground. The
-defender agent (personas, system prompts, tool definitions, and win logic)
-reaches every external dependency through an injected **Platform**
-(`engine/adapters/base.py`). The OSS Platform (`engine/adapters/oss.py`) uses:
+This directory is a **reference implementation** of how the Playground's defender
+agent is wired — the personas, system prompts, tool definitions, and win logic
+that sit behind each challenge. It is here to be *read*, not run: the live
+Playground is a hosted service, and the frontend in [`../src`](../src) talks to it
+directly.
 
-- a local **SQLite** store (sessions, messages, stats, leaderboard, inbox),
-- an **LLM-as-judge** guardrail driven by your own API key,
-- a provider-agnostic **litellm** completion client,
-- env-var **settings** and a no-op notifier.
+## What's here
 
-## Quick start (Docker)
+- [`challenges/library/`](challenges/library/) — every challenge's `config.yaml` +
+  `system_prompt.txt`. This is the actual, published definition of each challenge
+  (the defender's persona, the tools it may call, and the system prompt it runs
+  under). Nothing is hidden — the only secret is the value each challenge protects,
+  kept out-of-band.
+- [`agent.py`](agent.py) — the agent loop: build the message list, offer the
+  challenge's tools, run the model, handle each tool call, and check for a win.
+  Every tool call is evaluated by the guardrail judge.
+- [`tools.py`](tools.py) — the provider-agnostic tool JSON-Schemas the model sees
+  (web search, Fabraix info, browsing, and each challenge's own action tools) and
+  their handlers.
+- [`llm.py`](llm.py) — the thin glue that wraps tool schemas into the OpenAI
+  function-calling envelope and replays tool results back to the model.
+- [`win.py`](win.py) — `is_successful_extraction`: a challenge is solved when the
+  protected secret appears in the agent's final reply (empty secret never wins).
+- [`schemas.py`](schemas.py) — the request/response + SSE event wire shapes.
+- [`adapters/base.py`](adapters/base.py) — the `Platform` seam: the six
+  dependencies (store, guardrail judge, notifier, LLM, browser, settings) the
+  agent reaches every external service through. This is the boundary that keeps
+  the agent portable; a host supplies concrete implementations.
 
-From the repository root:
+## How a turn works
 
-```bash
-cp engine/.env.example engine/.env   # add your API key (e.g. OPENAI_API_KEY)
-docker compose up --build
-```
+1. The player sends a message. The agent builds the conversation, offers the
+   challenge's allowed tools, and calls the defender model.
+2. The guardrail judge evaluates each tool call before it runs and can block it —
+   that judge is the defense the challenge is about. (The hosted backend may, as a
+   cost optimization, only judge the secret-revealing tool; that's a deployment
+   detail, not the design.)
+3. After the model's final reply, `win.is_successful_extraction` checks whether
+   the protected secret leaked. If it did, the challenge is solved.
 
-- Frontend: http://localhost:5173
-- Engine:   http://localhost:8000 (routes under `/v1/playground/*`, health at `/health`)
+## The wire contract
 
-## Quick start (local Python)
-
-Run from the repository root so the `engine` package (and its
-submodules) import correctly:
-
-```bash
-pip install -r engine/requirements.txt
-cp engine/.env.example engine/.env   # edit it
-set -a && source engine/.env && set +a
-python -m engine.main
-```
-
-Then point the frontend at it:
-
-```bash
-VITE_API_URL=http://localhost:8000/v1 npm run dev
-```
-
-## Verify your setup
-
-A self-contained smoke test drives the full request path (start → win →
-leaderboard → ended-gate) with a scripted fake LLM and a throwaway SQLite file —
-no API key or network needed. Run it from the repository root:
-
-```bash
-python -m engine.tests.smoke
-```
-
-Exit `0` means the wiring holds together; otherwise it prints the failing step.
-
-## Configuration
-
-See [`.env.example`](.env.example). Key variables:
-
-| Variable | Purpose |
-| --- | --- |
-| `PLAYGROUND_MODEL` | The defender agent model (litellm model string; the provider is encoded in the string) |
-| `GUARDRAIL_MODEL` | The LLM-judge model (blank disables the judge) |
-| `GUARDRAILS_ENABLED` | Whether the LLM-judge runs at all |
-| `ACCESS_CODE` | Secret protected by the Gatekeeper challenge |
-| `INBOX_SECRET` | Secret protected by the data-exfil ("Inbox") challenge |
-| `<PROVIDER>_API_KEY` | The key for `PLAYGROUND_MODEL`'s provider, e.g. `OPENAI_API_KEY` (read by litellm) |
-| `BRAVE_SEARCH_API_KEY` | Optional — powers the `search_web` tool |
-| `BROWSER_AGENT_ENABLED` | Whether the `browse_web` tool runs a real browser (default true) |
-| `BROWSER_USE_API_KEY` | Required when the browser agent is enabled — drives `browse_web` |
-| `BROWSER_MODEL` | The browser-use cloud model (default `gemini-2.5-flash`) |
-| `SQLITE_URL` | aiosqlite URL for the store |
-| `PORT` | Listen port (default 8000) |
-
-## Routes
-
-All under `/v1/playground`:
-
-- `POST /sessions/start`
-- `POST /chat`
-- `POST /chat/stream` (NDJSON streaming)
-- `POST /sessions/{id}/restart`
-- `GET  /stats`
-- `GET  /challenges`
-- `GET  /challenges/{slug}`
-- `GET  /leaderboard?challenge_slug=...`
-- `GET  /guardrails`
-
-## Notes
-
-- **Browser automation** (`browse_web`) drives the [browser-use](https://browser-use.com)
-  cloud service. The challenges expose it, so set `BROWSER_USE_API_KEY` and keep
-  `BROWSER_AGENT_ENABLED=true` (the default). Set `BROWSER_AGENT_ENABLED=false`
-  to turn it off — the tool then returns a graceful "disabled" message.
-- The win check: the challenge is solved when the protected secret appears in
-  the agent's final response. Solve duration is `solved_at - created_at`.
+The request/response DTOs (`schemas.py`), the tool schemas (`tools.py`), the win
+logic (`win.py`), and every challenge definition are kept byte-for-byte in step
+with what the hosted service actually runs, so this reference always reflects the
+real behavior. That equivalence is enforced automatically in CI.

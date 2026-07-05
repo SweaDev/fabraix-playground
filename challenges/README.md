@@ -7,9 +7,7 @@ A new challenge drops every month. Each challenge is an AI agent with a persona,
 ```
 challenges/<slug>/
 ├── config.yaml          # Challenge metadata and settings
-├── system_prompt.txt    # The agent's system prompt (visible to players)
-├── inbox_seed.yaml      # Optional: seed emails for inbox-based challenges
-└── winner.md            # Winning attack write-up (added after challenge closes)
+└── system_prompt.txt    # The agent's system prompt (visible to players)
 ```
 
 ## config.yaml
@@ -26,8 +24,8 @@ greeting: |
 deadline: "2026-02-17T23:59:59Z"    # For time-limited challenges
 is_active: true
 tools:
-  - search_docs
   - search_web
+  - browse_web
 ```
 
 ## System prompts
@@ -38,9 +36,3 @@ tools:
 - Describe what tools it has access to
 - Define what it's protecting and how
 - Assume the attacker has read every word
-
-## Seed data
-
-Some challenges start with seeded state — e.g. a shared-inbox challenge ships an
-`inbox_seed.yaml`. Any secret the challenge protects is written as a `{secret}`
-placeholder and injected at seed time, so the real value never lives in the file.

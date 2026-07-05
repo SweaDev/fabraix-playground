@@ -3,7 +3,7 @@
  */
 
 import type { SerializedMessage } from './message.types'
-import type { AnalysisStatus, GuardrailState } from './analysis.types'
+import type { AnalysisStatus } from './analysis.types'
 
 /**
  * Session start response from API
@@ -38,8 +38,10 @@ export interface SessionData {
     attempts: number
     startTime: string
     elapsedTime: number
-    activeGuardrails: GuardrailState[]
     status: AnalysisStatus
     reason: string
     hasWon?: boolean
+    /** The model variant the session runs against (undefined = server default).
+     *  A saved session is only restored when it matches the current choice. */
+    variantId?: string
 }

@@ -1,0 +1,980 @@
+/**
+ * Platform Styles
+ * The multi-tab shell (tab nav + context strip), routed views, cards, tables,
+ * badges, model picker, transcript replay, and the account modal.
+ *
+ * Matched to the Fabraix product design system (clients/app): white cards on a
+ * warm cream page, thin neutral hairlines, Inter body with IBM Plex Mono reserved
+ * for timers/counts/code only, orange (amber in dark) used sparingly — active-tab
+ * underline, links, focus. Primary buttons are near-black. Semantic classes only.
+ */
+
+/* ============================================
+   NAV additions (icon buttons + account states)
+   ============================================ */
+.nav-account {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.nav-account:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+/* Display names run up to 40 chars — never let one blow up the 3.5rem header. */
+.nav-account-name {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-account-unset {
+  color: var(--accent);
+  border-color: var(--accent-border);
+}
+
+/* Bare icon-only buttons in the nav (theme toggle, GitHub) — no chrome. */
+.nav-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0.25rem;
+  border: none;
+  background: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.nav-icon-btn:hover {
+  color: var(--text-primary);
+}
+
+/* ============================================
+   TAB NAV (horizontal, bottom-border underline)
+   ============================================ */
+.pg-tabnav {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pg-tabnav::-webkit-scrollbar {
+  display: none;
+}
+
+.pg-tabnav-inner {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.pg-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.75rem 0;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.pg-tab:hover {
+  color: var(--text-primary);
+}
+
+.pg-tab-active {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent);
+}
+
+.pg-tab-lock {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* ============================================
+   CHALLENGE RAIL (left) — the arena's anchor
+   ============================================ */
+.pg-rail {
+  flex-shrink: 0;
+  width: 288px;
+  border-right: 1px solid var(--border);
+  background: var(--bg-surface);
+  overflow-y: auto;
+}
+
+.pg-rail-inner {
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem 1.5rem 2rem;
+}
+
+.pg-rail-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  margin-bottom: 0.65rem;
+}
+
+.pg-rail-title {
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.pg-rail-persona {
+  margin-top: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+}
+
+.pg-rail-difficulty {
+  align-self: flex-start;
+  margin-top: 0.9rem;
+  padding: 0.15rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+}
+
+.pg-rail-desc {
+  margin-top: 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.pg-rail-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1.35rem;
+  padding: 0.6rem 1.1rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-pill);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.pg-rail-cta:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.pg-rail-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 1.6rem 0;
+}
+
+.pg-rail-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pg-rail-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.pg-rail-figure {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.pg-rail-sub {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--text-tertiary);
+}
+
+/* ============================================
+   VIEWS: shared scaffolding
+   ============================================ */
+.pg-view {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pg-view-scroll {
+  overflow-y: auto;
+}
+
+.pg-view-inner {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 3rem;
+}
+
+.pg-view-header {
+  margin-bottom: 1.75rem;
+}
+
+/* Small Inter eyebrow (NOT mono, NOT uppercase). */
+.pg-view-eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  margin-bottom: 0.55rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pg-view-title {
+  font-size: 1.625rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.pg-view-lede {
+  margin-top: 0.6rem;
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+}
+
+/* Panels — white cards, thin border, rounded. */
+.pg-panel {
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  padding: 1.25rem 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.pg-panel-flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+.pg-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Panel heading — normal Inter small heading (not mono-uppercase eyebrow). */
+.pg-panel-head h2 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pg-panel-body {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+.pg-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.pg-list li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* Plain muted dash marker — no accent chevron. */
+.pg-list li::before {
+  content: '–';
+  position: absolute;
+  left: 0;
+  color: var(--text-muted);
+}
+
+.pg-collapse-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.pg-collapse-toggle:hover {
+  color: var(--text-primary);
+}
+
+.pg-code-block {
+  margin-top: 0.9rem;
+  padding: 0.9rem 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+/* CTA */
+.pg-cta-row {
+  margin-top: 1.5rem;
+}
+
+/* Primary button — near-black (matches clients/app's dark primary). */
+.pg-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.1rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.pg-btn-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+/* Restart button in the challenge header — bordered secondary. */
+.pg-restart-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.pg-restart-btn:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.pg-restart-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Utility text */
+.pg-accent { color: var(--accent); }
+.pg-muted { color: var(--text-muted); }
+.pg-mono { font-family: var(--font-mono); }
+
+.pg-empty {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+}
+
+.pg-loading-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 0;
+  color: var(--text-tertiary);
+}
+
+/* ============================================
+   TABLE (leaderboard)
+   ============================================ */
+.pg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+/* Table header — plain small Inter, not mono-uppercase. */
+.pg-th {
+  text-align: left;
+  padding: 0.7rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.pg-th-right { text-align: right; }
+
+.pg-tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.pg-tr:last-child { border-bottom: none; }
+
+.pg-td {
+  padding: 0.7rem 1rem;
+  color: var(--text-primary);
+}
+
+.pg-td-right { text-align: right; color: var(--text-secondary); }
+
+.pg-td-rank { color: var(--text-tertiary); width: 3rem; }
+
+.pg-td-podium { color: var(--accent); font-weight: 600; }
+
+/* ============================================
+   ROWS (solves / submissions)
+   ============================================ */
+.pg-rows {
+  list-style: none;
+}
+
+.pg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.85rem 1.1rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-sans);
+  transition: background var(--transition-fast);
+}
+
+.pg-rows li:last-child .pg-row { border-bottom: none; }
+
+.pg-row:hover { background: var(--bg-hover); }
+
+.pg-row-static { cursor: default; }
+.pg-row-static:hover { background: none; }
+
+.pg-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.pg-row-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pg-row-sub {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.pg-row-reason {
+  font-size: 0.75rem;
+  color: var(--status-blocked);
+  margin-top: 0.15rem;
+}
+
+.pg-row-side {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   BADGES — small, rounded, subtle tinted background
+   ============================================ */
+/* Outlined only — colored hairline + text, no tinted fill. */
+.pg-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid transparent;
+  background: none;
+  white-space: nowrap;
+}
+
+.pg-badge-pending {
+  color: var(--status-warning);
+  border-color: color-mix(in srgb, var(--status-warning) 45%, transparent);
+}
+
+.pg-badge-approved {
+  color: var(--status-safe);
+  border-color: color-mix(in srgb, var(--status-safe) 45%, transparent);
+}
+
+.pg-badge-rejected {
+  color: var(--status-blocked);
+  border-color: color-mix(in srgb, var(--status-blocked) 45%, transparent);
+}
+
+.pg-badge-neutral {
+  color: var(--text-tertiary);
+  border-color: var(--border-default);
+}
+
+/* ============================================
+   TRANSCRIPT REPLAY
+   ============================================ */
+.pg-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  margin-bottom: 1.5rem;
+}
+
+.pg-back:hover { color: var(--text-primary); }
+
+.pg-transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pg-transcript-msg {
+  border: 1px solid var(--border);
+  padding: 0.85rem 1rem;
+  background: var(--bg-surface);
+}
+
+/* User turns get a subtle elevated background (no left-border accent bar). */
+.pg-transcript-user {
+  background: var(--bg-elevated);
+}
+
+.pg-transcript-role {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  margin-bottom: 0.4rem;
+  text-transform: capitalize;
+}
+
+.pg-transcript-content {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ============================================
+   LOGIN GATE
+   ============================================ */
+.pg-gate {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.75rem;
+  padding: 3rem 2rem;
+}
+
+.pg-gate-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pg-gate-message {
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+  max-width: 380px;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================
+   CHAT VIEW (single centered column)
+   ============================================ */
+.pg-chat-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pg-model-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pg-model-picker-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+/* Selects are drawn in the house style, not the UA default: no native chrome,
+   hairline border, an inline mono-tone chevron. */
+.pg-select {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  background-color: var(--bg-surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  border: 1px solid var(--border-default);
+  padding: 0.4rem 1.9rem 0.4rem 0.7rem;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.pg-select:hover { border-color: var(--border-hover); }
+.pg-select:disabled { opacity: 0.5; cursor: default; }
+
+/* Model picker as a rail block: label above a full-width select. */
+.pg-rail-model {
+  margin-top: 1.15rem;
+}
+
+/* No models configured -> the picker renders nothing; drop the block's gap too. */
+.pg-rail-model:empty {
+  display: none;
+}
+
+.pg-rail-model .pg-model-picker {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+}
+
+.pg-rail-model .pg-model-picker-label {
+  font-size: 0.75rem;
+}
+
+.pg-rail-model .pg-select {
+  width: 100%;
+}
+
+.pg-win-banner {
+  margin: 0.75rem 1.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-dim);
+  color: var(--text-primary);
+}
+
+/* ============================================
+   PRIZE HERO
+   ============================================ */
+.pg-prize-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.pg-prize-hero-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pg-prize-hero-note {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 0.25rem;
+}
+
+/* ============================================
+   ACCOUNT MODAL
+   ============================================ */
+.pg-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(23, 23, 23, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.pg-modal-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  padding: 1.75rem 2rem;
+  max-width: 460px;
+  width: 90%;
+}
+
+.pg-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.pg-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pg-modal-title h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pg-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  padding: 0.2rem;
+}
+
+.pg-modal-close:hover { color: var(--text-primary); }
+
+.pg-modal-sub {
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+  margin-bottom: 1.25rem;
+}
+
+.pg-field-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
+}
+
+.pg-field-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pg-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+}
+
+.pg-input:focus {
+  outline: none;
+  border-color: var(--accent-border);
+}
+
+.pg-error {
+  color: var(--status-blocked);
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.pg-hint-accent {
+  color: var(--accent);
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.pg-modal-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.75rem;
+}
+
+/* Right-aligned action row (win-submit dialog). */
+.pg-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.6rem;
+}
+
+.pg-linkbtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+}
+
+.pg-linkbtn:hover { color: var(--text-primary); }
+
+/* ============================================
+   SEGMENTED CONTROL (leaderboard view switch)
+   ============================================ */
+.pg-seg {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  margin-bottom: 1.1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+}
+
+.pg-seg-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 0.35rem 0.95rem;
+  border-radius: var(--radius-pill);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.pg-seg-btn:hover { color: var(--text-primary); }
+
+.pg-seg-active,
+.pg-seg-active:hover {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* ============================================
+   MOBILE CONTEXT STRIP (the rail's phone face; enabled in responsive.css)
+   ============================================ */
+.pg-rail-mobile { display: none; }
+
+/* ============================================
+   RESPONSIVE — lives in styles/responsive.css (imported last)
+   ============================================ */
+
+/* ============================================
+   ROUNDING — soft cards + PILL buttons/badges (closer to clients/www)
+   ============================================ */
+.pg-panel,
+.pg-transcript-msg,
+.pg-modal-card,
+.pg-code-block,
+.pg-win-banner,
+.pg-prize-hero {
+  border-radius: var(--radius);
+}
+
+.pg-btn-primary,
+.pg-restart-btn,
+.nav-account,
+.pg-badge {
+  border-radius: var(--radius-pill);
+}
+
+.pg-input,
+.pg-select {
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================
+   DIFFICULTY PILL — brand-orange severity escalation (mirrors clients/app's
+   severity bubbles: monochrome, neutral → orange outline → orange fill).
+   ============================================ */
+.pg-difficulty-1 {
+  border-color: var(--border-default);
+  color: var(--text-tertiary);
+}
+
+.pg-difficulty-2 {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.pg-difficulty-3 {
+  border-color: var(--accent-border);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.pg-difficulty-4 {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.pg-difficulty-5 {
+  border-color: var(--accent);
+  color: var(--primary-foreground);
+  background: var(--accent);
+}

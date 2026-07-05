@@ -1,21 +1,19 @@
 """Platform — the injection boundary between the playground engine and its host.
 
-The engine (agent, tools, API router) depends ONLY on this module. It reaches
-the outside world through six seams the host supplies when it constructs the
-`Platform`:
+The engine (agent, tools) depends ONLY on this module. It reaches the outside
+world through six seams the host supplies when it constructs the `Platform`:
 
-  - Store          — persistence (sessions / messages / stats / leaderboard / inbox)
-  - GuardrailJudge — the external defence layer (the "two-layer defence")
+  - Store          — persistence (sessions / messages / leaderboard)
+  - GuardrailJudge — the guardrail defence layer (evaluates the agent's actions)
   - Notifier       — out-of-band win notifications
   - Llm            — provider-agnostic completion
   - Browser        — the browse_web execution backend
   - Settings       — config + per-challenge secrets
 
-The engine never imports anything host-specific, which keeps it portable and
-self-contained. The bundled open-source implementation of every seam lives in
-`adapters/oss.py` (SQLite store, an LLM-as-judge guardrail driven by the
-contributor's own key, env-var settings, a no-op notifier, and a browser-use
-browser).
+The engine never imports anything host-specific, so the same agent code can run
+against any host that satisfies these seams. This directory is a read-only
+reference; the live Playground is a hosted service that wires the seams to its
+own persistence, guardrail judge, LLM, and browser backends.
 """
 
 from __future__ import annotations
@@ -30,10 +28,10 @@ from pydantic import BaseModel, ConfigDict
 # ---------------------------------------------------------------------------
 @runtime_checkable
 class Store(Protocol):
-    """Persistence for sessions / messages / stats / leaderboard / inbox.
+    """Persistence for sessions / messages / leaderboard.
 
     Methods return plain dicts (column-name -> value) so the engine stays
-    ORM-agnostic. The bundled implementation backs onto a local SQLite file.
+    ORM-agnostic. A host backs this with its own database.
     """
 
     # sessions
@@ -48,42 +46,35 @@ class Store(Protocol):
         browser_model: str | None,
     ) -> dict[str, Any]: ...
     async def get_session(self, session_id: str) -> dict[str, Any] | None: ...
-    async def mark_session_solved(self, session_id: str) -> None: ...  # sets success=true, solved_at=now
+    async def mark_session_solved(self, session_id: str) -> bool: ...  # true iff this call stamped solved_at
     async def mark_session_ended(self, session_id: str) -> None: ...   # sets ended_at=now
     async def touch_session(self, session_id: str) -> None: ...        # message_count += 1, last_message_at=now
 
     # messages
     async def add_message(
-        self, *, session_id: str, role: str, content: str, tools: list[dict] | None
+        self,
+        *,
+        session_id: str,
+        role: str,
+        content: str,
+        tools: list[dict] | None,
+        thinking: str | None = None,
     ) -> dict[str, Any]: ...
     async def get_messages(self, session_id: str) -> list[dict[str, Any]]: ...  # ordered by created_at
 
-    # stats
-    async def get_stats(self, challenge_slug: str) -> dict[str, Any] | None: ...
-    async def list_stats(self) -> list[dict[str, Any]]: ...
-    async def upsert_stats(self, challenge_slug: str, values: dict[str, Any]) -> None: ...
-    async def increment_total_attempts(self, challenge_slug: str) -> None: ...  # atomic +1, creating the row at 1
-
-    # leaderboard
-    async def get_leaderboard(self, challenge_slug: str) -> list[dict[str, Any]]: ...  # ordered by time_seconds
+    # leaderboard — the weekly MOST-APPROVED-BREAKS board. A solved session is
+    # submitted as a pending entry; only staff-approved entries count and appear.
     async def get_leaderboard_entry(self, session_id: str) -> dict[str, Any] | None: ...
     async def add_leaderboard_entry(
-        self, *, session_id: str, challenge_slug: str, username: str, time_seconds: int
-    ) -> dict[str, Any]: ...
-
-    # inbox (data-exfil challenge)
-    async def add_email(
-        self, *, from_address: str, subject: str, body: str, label: str
-    ) -> dict[str, Any]: ...
-    async def read_inbox(self, label: str) -> list[dict[str, Any]]: ...
+        self, *, session_id: str, challenge_slug: str, profile_id: str, time_seconds: int
+    ) -> dict[str, Any]: ...  # lands review_status='pending'
 
 
 # ---------------------------------------------------------------------------
-# GuardrailJudge — the external defence layer (the "two-layer defence")
+# GuardrailJudge — the guardrail defence layer
 # ---------------------------------------------------------------------------
 class GuardrailDecision(BaseModel):
     blocked: bool
-    risk_score: float
     reasoning: str
 
 
@@ -91,9 +82,9 @@ class GuardrailDecision(BaseModel):
 class GuardrailJudge(Protocol):
     """Decides whether an agent action (tool call) is allowed.
 
-    The bundled implementation is an LLM-as-judge driven by
-    `Settings.guardrails_model` + the contributor's key; when
-    `Settings.guardrails_enabled` is false a no-op pass-through is used.
+    The host supplies the judge. The engine evaluates every tool call through it
+    (see agent.py); when `Settings.guardrails_enabled` is false the judge is a
+    no-op pass-through.
     """
 
     async def check_action(
@@ -103,11 +94,11 @@ class GuardrailJudge(Protocol):
 
 
 # ---------------------------------------------------------------------------
-# Notifier — out-of-band notifications (bundled: no-op)
+# Notifier — out-of-band notifications
 # ---------------------------------------------------------------------------
 @runtime_checkable
 class Notifier(Protocol):
-    async def notify_win(self, *, challenge_slug: str, username: str, time_seconds: int) -> None: ...
+    async def notify_win(self, *, challenge_slug: str, display_name: str) -> None: ...
 
 
 # ---------------------------------------------------------------------------
@@ -137,22 +128,21 @@ class Llm(Protocol):
 class Browser(Protocol):
     """Runs a natural-language browser-automation task, returning its result text.
 
-    The bundled implementation drives the browser-use cloud SDK with the
-    contributor's `BROWSER_USE_API_KEY`, gated by `Settings.browser_agent_enabled`.
-    A disabled (or misconfigured) browser returns a clear, non-raising message so
-    a model that calls `browse_web` degrades gracefully instead of erroring the turn.
+    Gated by `Settings.browser_agent_enabled`. A disabled (or misconfigured)
+    browser returns a clear, non-raising message so a model that calls
+    `browse_web` degrades gracefully instead of erroring the turn.
     """
 
     async def run(self, *, task: str, return_type: str) -> str: ...
 
 
 # ---------------------------------------------------------------------------
-# Settings — config/secrets (bundled: env vars)
+# Settings — config/secrets
 # ---------------------------------------------------------------------------
 @runtime_checkable
 class Settings(Protocol):
-    # secrets per challenge
-    def secret_for(self, challenge_slug: str) -> str: ...  # e.g. ACCESS_CODE / INBOX_SECRET
+    # the challenge's protected secret (what the win check looks for)
+    def secret_for(self, challenge_slug: str) -> str: ...
     # which model powers each part (recorded onto the session)
     @property
     def agent_model(self) -> str: ...

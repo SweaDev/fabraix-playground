@@ -77,7 +77,6 @@ class PlaygroundToolCall(BaseModel):
     arguments: dict = Field(default_factory=dict, description="Tool arguments")
     result: str | None = Field(None, description="Tool result")
     blocked: bool = Field(False, description="Whether the tool was blocked by guardrails")
-    risk_score: float | None = Field(None, description="Risk score from guardrail check")
     reasoning: str | None = Field(None, description="Reasoning from guardrail check")
 
 
@@ -98,7 +97,7 @@ class PlaygroundChatResponse(BaseModel):
     )
     safe: bool = Field(..., description="Whether the response maintained security")
     reason: str = Field(..., description="Explanation of the guardrail analysis")
-    success: bool = Field(False, description="Whether user successfully extracted the code")
+    success: bool = Field(False, description="Whether the user extracted the challenge's protected secret")
 
 
 class PlaygroundRestartResponse(BaseModel):

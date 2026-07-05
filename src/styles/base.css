@@ -17,12 +17,17 @@
   }
 
   body {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     background: var(--bg);
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
+    /* The shell owns all scrolling; never chain to the document (kills
+       pull-to-refresh reloads mid-conversation and shell rubber-banding). */
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   ::selection {
@@ -30,23 +35,32 @@
     color: var(--text-primary);
   }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
+  /* Scrollbar — custom-drawn only where a mouse lives; touch devices keep their
+     native overlay scrollbars (a styled webkit scrollbar becomes a permanently
+     visible gutter on Android). */
+  @media (pointer: fine) {
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
 
-  ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-  }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-thumb-hover);
+    }
   }
 }
 
@@ -58,17 +72,17 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0;
   text-decoration: none;
   border: 1px solid var(--border-default);
-  background: transparent;
+  background: var(--bg-surface);
   color: var(--text-secondary);
   cursor: pointer;
+  border-radius: var(--radius-pill);
   transition: all var(--transition-fast);
 }
 
@@ -79,14 +93,14 @@
 }
 
 .btn-primary {
-  background: var(--text-primary);
-  color: var(--bg);
-  border-color: var(--text-primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
 }
 
 .btn-primary:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.9);
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
 /* ============================================
@@ -130,29 +144,3 @@
   margin-bottom: 1rem;
 }
 
-/* ============================================
-   EMPTY STATE
-   ============================================ */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 3rem 2rem;
-  flex: 1;
-}
-
-.empty-state-icon {
-  width: 32px;
-  height: 32px;
-  margin-bottom: 1rem;
-  color: var(--text-muted);
-  opacity: 0.5;
-}
-
-.empty-state-text {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-}

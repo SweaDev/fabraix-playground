@@ -1,0 +1,232 @@
+/**
+ * Responsive Styles — ALL media queries live here, and this file is imported
+ * LAST from styles/index.css. Media queries add no specificity, so a mobile
+ * override only beats the unconditional component rule it targets by coming
+ * later in the cascade. Keeping every breakpoint rule in one late-imported
+ * file makes that ordering structural instead of accidental.
+ */
+
+/* ============================================
+   <= 900px — the shell reflows: rail pane -> context strip
+   ============================================ */
+@media (max-width: 900px) {
+  .pg-body {
+    flex-direction: column;
+  }
+
+  /* The rail stops being a pane: full-width, auto-height, no inner scroll. */
+  .pg-rail {
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* The desktop rail body (brief, CTA, prize blocks) folds away — the Briefing
+     view already carries all of it. The slim strip below takes over. */
+  .pg-rail-inner {
+    display: none;
+  }
+
+  /* One-line context strip: challenge + difficulty + prize, with the sign-in
+     nudge (or the player's weekly tally) beneath. Tap-through to the Briefing. */
+  .pg-rail-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.65rem 1rem;
+    text-decoration: none;
+  }
+
+  .pg-rail-mobile-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .pg-rail-mobile-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pg-rail-mobile .pg-rail-difficulty {
+    align-self: center;
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+
+  .pg-rail-mobile-prize {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .pg-rail-mobile-sub {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+  }
+
+  /* Tab bar: tightened metrics so the next tab always peeks, plus scrolling
+     edge fades (the `local` layers ride the content and cover the pinned
+     `scroll` shadows at the ends, so a fade only shows where more tabs hide). */
+  .pg-tabnav {
+    overscroll-behavior-x: contain;
+    background:
+      linear-gradient(to right, var(--bg-surface) 45%, color-mix(in srgb, var(--bg-surface) 0%, transparent))
+        left / 32px 100% no-repeat local,
+      linear-gradient(to left, var(--bg-surface) 45%, color-mix(in srgb, var(--bg-surface) 0%, transparent))
+        right / 32px 100% no-repeat local,
+      linear-gradient(to right, var(--bg-hover), transparent) left / 20px 100% no-repeat scroll,
+      linear-gradient(to left, var(--bg-hover), transparent) right / 20px 100% no-repeat scroll,
+      var(--bg-surface);
+  }
+
+  .pg-tabnav-inner {
+    gap: 1.15rem;
+    padding: 0 1rem;
+    min-width: max-content;
+  }
+
+  /* The strip already shows name + difficulty — the chat header keeps only the
+     objective with a controls row (model picker + Restart) beneath it. */
+  .challenge-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.75rem 1rem;
+    gap: 0.6rem;
+  }
+
+  .challenge-label,
+  .challenge-title {
+    display: none;
+  }
+
+  .challenge-objective {
+    font-size: 0.8125rem;
+  }
+
+  .challenge-meta {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+  }
+
+  .challenge-stats {
+    display: none;
+  }
+
+  /* The header-hosted model picker is the mobile face of the rail's picker. */
+  .challenge-header .pg-model-picker {
+    display: flex;
+  }
+
+  .challenge-header .pg-model-picker-label {
+    display: none;
+  }
+}
+
+/* ============================================
+   <= 768px — phone-density spacing, type, and touch ergonomics
+   ============================================ */
+@media (max-width: 768px) {
+  .nav {
+    padding: 0 1rem;
+  }
+
+  .nav-account-name {
+    max-width: 6.5rem;
+  }
+
+  .pg-view-inner {
+    padding: 1.5rem 1.15rem 2.5rem;
+  }
+
+  .pg-view-title {
+    font-size: 1.375rem;
+  }
+
+  .pg-win-banner {
+    margin: 0.75rem 1rem;
+  }
+
+  /* Chat column */
+  .chat-messages {
+    padding: 1rem;
+  }
+
+  .message,
+  .initial-loading {
+    max-width: 92%;
+  }
+
+  .processing-steps {
+    max-width: 100%;
+  }
+
+  .chat-input-area {
+    /* safe-area inset is 0 unless the platform provides one. */
+    padding: 0.25rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+  }
+
+  /* 16px inputs suppress iOS Safari's focus auto-zoom. */
+  .chat-input,
+  .pg-input,
+  .pg-select {
+    font-size: 1rem;
+  }
+
+  .chat-submit {
+    padding: 0.55rem 1.2rem;
+  }
+
+  /* Wider tap targets for the small icon controls. */
+  .nav-icon-btn,
+  .pg-modal-close {
+    padding: 0.5rem;
+  }
+
+  .pg-back {
+    padding: 0.5rem 0.5rem 0.5rem 0;
+    margin-bottom: 1rem;
+  }
+
+  /* Tables (standings) scroll sideways inside their card instead of clipping. */
+  .pg-panel-flush {
+    overflow-x: auto;
+  }
+
+  .pg-td {
+    overflow-wrap: anywhere;
+  }
+
+  /* No nested scroll traps inside page views — let the page carry the length. */
+  .pg-code-block {
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  /* Account / win modal: top-anchored so the iOS keyboard can't swallow the
+     actions, and sized to the phone with the card's padding pulled in. */
+  .pg-modal-overlay {
+    align-items: flex-start;
+    padding: 3rem 1rem 1rem;
+  }
+
+  .pg-modal-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 1.4rem 1.25rem;
+  }
+}

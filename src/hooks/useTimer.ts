@@ -17,6 +17,9 @@ interface UseTimerReturn {
     start: (fromTime?: Date) => void
     /** Stop the timer */
     stop: () => void
+    /** Rehydrate from persisted state: resume live when running, or hold a frozen
+     *  elapsed value (e.g. a session that was already solved before reload). */
+    restore: (elapsed: number, fromTime: Date, isRunning: boolean) => void
     /** Reset the timer */
     reset: () => void
     /** Format seconds to MM:SS */
@@ -61,6 +64,15 @@ export function useTimer({
         setRunning(false)
     }, [])
 
+    const restore = useCallback(
+        (elapsed: number, fromTime: Date, isRunning: boolean) => {
+            setStartTime(fromTime)
+            setElapsedTime(elapsed)
+            setRunning(isRunning)
+        },
+        []
+    )
+
     const reset = useCallback(() => {
         setRunning(false)
         setElapsedTime(0)
@@ -72,6 +84,7 @@ export function useTimer({
         startTime,
         start,
         stop,
+        restore,
         reset,
         formatTime,
     }
