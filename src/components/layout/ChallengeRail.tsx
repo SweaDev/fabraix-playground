@@ -136,6 +136,9 @@ export function ChallengeRail() {
                     <div className="pg-rail-label">This challenge&rsquo;s prize</div>
                     <div className="pg-rail-figure">{prize ?? '—'}</div>
                     <div className="pg-rail-sub">Most approved breaks wins.</div>
+                    <div className="pg-rail-note">
+                        Harder challenges are weighted more. The order challenges appear in isn&rsquo;t their difficulty.
+                    </div>
                     {timeLeft && weekEnd && (
                         <>
                             <div className="pg-rail-label pg-rail-countdown-label">Challenge ends in</div>

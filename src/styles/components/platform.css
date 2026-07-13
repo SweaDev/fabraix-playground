@@ -228,6 +228,16 @@
   color: var(--text-tertiary);
 }
 
+/* Scoring footnote under the prize line: how breaks are weighted. Smaller and
+   dimmer than pg-rail-sub so it reads as a clarifying aside, not a headline. */
+.pg-rail-note {
+  margin-top: 0.375rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+  opacity: 0.8;
+}
+
 /* Prize-week countdown: figure-weight presence, tabular digits so the
    per-second tick doesn't jitter the layout. */
 .pg-rail-countdown-label {
