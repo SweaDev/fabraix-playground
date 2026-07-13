@@ -52,7 +52,7 @@ export function PrizesView() {
                         <h2>The week</h2>
                     </div>
                     <p className="pg-panel-body">
-                        Weeks run Thursday to Wednesday in UTC, ending at midnight Wednesday night UTC.
+                        Weeks run Monday to Sunday in UTC, ending at midnight Sunday night UTC.
                         Breaks approved within that window count toward that week's board.
                     </p>
                 </section>
