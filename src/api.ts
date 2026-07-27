@@ -395,9 +395,11 @@ export async function fetchMySubmissions(): Promise<Submission[]> {
     return apiRequest<Submission[]>('/playground/me/submissions')
 }
 
-/** Light per-player summary for the sidebar: approved breaks this week. */
-export async function fetchMySummary(): Promise<{ weeklyBreaks: number }> {
-    return apiRequest<{ weeklyBreaks: number }>('/playground/me/summary')
+/** Light per-player summary for the sidebar: approved breaks in the challenge's prize window. */
+export async function fetchMySummary(challengeSlug: string): Promise<{ weeklyBreaks: number }> {
+    return apiRequest<{ weeklyBreaks: number }>(
+        `/playground/me/summary?challenge_slug=${encodeURIComponent(challengeSlug)}`,
+    )
 }
 
 export interface TranscriptMessage {

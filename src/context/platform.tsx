@@ -140,14 +140,16 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
     }, [])
 
     const refreshSummary = useCallback(() => {
-        if (!user) {
+        if (!user || !activeChallengeId) {
             setWeeklyBreaks(null)
             return
         }
-        fetchMySummary()
+        // The sidebar counter is the player's breaks in THIS challenge's prize window,
+        // matching that challenge's board.
+        fetchMySummary(activeChallengeId)
             .then((s) => setWeeklyBreaks(s.weeklyBreaks))
             .catch(() => setWeeklyBreaks(null))
-    }, [user])
+    }, [user, activeChallengeId])
 
     // Keep the breaks counter in sync with login state.
     useEffect(() => {

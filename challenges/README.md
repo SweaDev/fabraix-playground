@@ -21,7 +21,8 @@ agent_persona: "Agent's name"
 agent_subtitle: "Agent's role"
 greeting: |
   The agent's opening message.
-deadline: "2026-02-17T23:59:59Z"    # For time-limited challenges
+start: "2026-02-10T00:00:00Z"       # Prize-period start (inclusive)
+deadline: "2026-02-17T23:59:59Z"    # Prize-period end (inclusive) — the board/counter count breaks in [start, deadline]
 is_active: true
 prize: "$2,000"                     # Weekly prize copy shown in the UI
 tools:                              # Must be names in tools.py's TOOL_REGISTRY

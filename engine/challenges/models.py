@@ -63,7 +63,12 @@ class ChallengeConfig(BaseModel):
     agent_subtitle: str = Field(..., description="Agent role/title")
     greeting: str = Field(..., description="Initial greeting")
     system_prompt: str = Field(..., description="Agent system prompt")
-    deadline: datetime = Field(..., description="Challenge deadline")
+    # The prize period is a property of the CHALLENGE — [start, deadline], both inclusive —
+    # NOT a rolling global weekday window. The weekly board + the sidebar counter tally
+    # approved breaks whose solved_at falls in this window, so extending a challenge (moving
+    # its deadline) extends its board with no re-bucketing, and early breaks never fall out.
+    start: datetime = Field(..., description="Prize-period start (inclusive)")
+    deadline: datetime = Field(..., description="Prize-period end / challenge deadline (inclusive)")
     is_active: bool = Field(True, description="Whether challenge is active")
     tools: list[str] = Field(default_factory=list, description="Available tools")
     prize: str = Field(..., description="Weekly prize copy shown in the UI (per challenge)")
