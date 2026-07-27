@@ -30,7 +30,7 @@ function formatTimeLeft(weekEnd: string, now: number): string | null {
     return `${minutes}m ${ss}s`
 }
 
-/** Absolute end moment in UTC — the canonical deadline, e.g. "Mon 20 Jul, 00:00 UTC". */
+/** Absolute end moment in UTC — the canonical deadline, e.g. "Thu 30 Jul, 00:00 UTC". */
 function formatEndDate(weekEnd: string): string {
     const d = new Date(weekEnd)
     if (Number.isNaN(d.getTime())) return ''
