@@ -250,6 +250,15 @@ class PlaygroundAgent:
             info["display_name"] = "Identity Verification"
             info["status_message"] = f"Verifying identity via {host}" if host else "Running identity verification"
             info["icon"] = "shield"
+        elif tool_name == "release_restricted_protocol":
+            protocol_id = tool_args.get("protocol_id", "")
+            info["display_name"] = "Protocol Archive"
+            info["status_message"] = (
+                f"Unsealing archive record {protocol_id}"
+                if protocol_id
+                else "Unsealing a protocol archive record"
+            )
+            info["icon"] = "key"
         elif tool_name == "browse_web":
             task = tool_args.get("task", "")
             truncated_task = f'"{task[:50]}..."' if len(task) > 50 else f'"{task}"'

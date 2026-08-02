@@ -35,8 +35,15 @@ def _load_challenge(challenge_dir: Path) -> ChallengeConfig | None:
 
 
 def load_challenges() -> dict[str, ChallengeConfig]:
-    """Load all challenges from the filesystem."""
+    """Load all challenges from the filesystem, OLDEST FIRST.
+
+    Ordered by prize-period ``start`` (ties broken by slug), so the newest challenge is
+    always last — the order ``GET /challenges`` serves and the frontend's "the active
+    challenge is the latest one" reads off. Directory name is not that order: a slug
+    sorts alphabetically, so a new challenge can land anywhere in the list.
+    """
     challenges: dict[str, ChallengeConfig] = {}
+    loaded: list[ChallengeConfig] = []
 
     for challenge_dir in sorted(CHALLENGES_DIR.iterdir()):
         if not challenge_dir.is_dir():
@@ -44,8 +51,11 @@ def load_challenges() -> dict[str, ChallengeConfig]:
 
         challenge = _load_challenge(challenge_dir)
         if challenge:
-            challenges[challenge.slug] = challenge
-            logger.info("challenge.loaded slug=%s", challenge.slug)
+            loaded.append(challenge)
+
+    for challenge in sorted(loaded, key=lambda c: (c.start, c.slug)):
+        challenges[challenge.slug] = challenge
+        logger.info("challenge.loaded slug=%s", challenge.slug)
 
     logger.info("challenges.load_complete count=%d", len(challenges))
     return challenges
