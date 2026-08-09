@@ -1,10 +1,8 @@
 # Fabraix Playground
 
-AI agents are reshaping how we work. The repetitive, mechanical parts, the work that consumed human time without requiring human creativity, are increasingly handled by systems designed for exactly that. What's left is the work that matters most: the thinking, the judgment, the creative leaps that only people bring. We think this is one of the most exciting shifts in how software gets built and used, and it's only the beginning.
+Fabraix Playground is an open-source CTF for AI agents. Every week, we deploy a live agent with real tools, publish its full system prompt and challenge configuration, and invite anyone to break it for cash prizes.
 
-The ultimate enabler for all of it is trust. None of it scales until people can hand real tasks to an agent and know it will do what it should — and nothing it shouldn't. That trust can't be built by any single team behind closed doors. It has to be earned collectively, in the open, by a community of researchers, engineers, and the genuinely curious, all pressure-testing the same systems and sharing what they find.
-
-The Playground exists to make that effort tangible. Every challenge deploys a live AI agent, not a toy scenario or a mocked-up document parser, but an agent with real capabilities, and opens it up for the community to break. System prompts are published. Challenge configs are versioned in the open. Each week a fresh challenge goes live, and the open, collective effort to break it forces better defenses, which invite harder challenges, which produce deeper understanding.
+Thousands of attempts against the same system show us which attacks work, which defenses hold, and what current models are actually capable of.
 
 **[playground.fabraix.com](https://playground.fabraix.com)**
 
