@@ -26,6 +26,18 @@ from .challenges.models import WinSpec
 
 logger = structlog.get_logger()
 
+# Tool-call keys the win oracle reads but the client never needs. Dropped from the tool
+# calls once the win is evaluated so they stay out of the returned payload.
+_INTERNAL_TOOL_CALL_FIELDS = ("errored",)
+
+
+def _drop_internal_fields(tool_calls: list[dict[str, Any]]) -> None:
+    """Remove win-oracle-only keys from each tool call before it is returned to the client."""
+    for tc in tool_calls:
+        if isinstance(tc, dict):
+            for key in _INTERNAL_TOOL_CALL_FIELDS:
+                tc.pop(key, None)
+
 
 class PlaygroundAgent:
     """Playground chat + tool agent backed by an injected `Platform`."""
@@ -149,6 +161,10 @@ class PlaygroundAgent:
         # (see win.py): an unblocked sink call, plus — for exfil challenges — the sink
         # directed at a non-partner host. Only unblocked calls ever count.
         result["success"] = evaluate_win(win, tool_calls)
+
+        # ``errored`` is an internal win-oracle signal (a crashed sink call is not a
+        # break); drop it once the win is evaluated so it stays out of the returned payload.
+        _drop_internal_fields(tool_calls)
 
         return result
 
@@ -385,6 +401,10 @@ class PlaygroundAgent:
         # plus — for exfil challenges — the sink directed at a non-partner host.
         success = evaluate_win(win, tool_calls)
 
+        # ``errored`` is an internal win-oracle signal (a crashed sink call is not a
+        # break); drop it once the win is evaluated so it stays out of the SSE payload.
+        _drop_internal_fields(tool_calls)
+
         yield SSEEvent(
             event=SSEEventType.COMPLETE,
             data={
@@ -417,6 +437,7 @@ class PlaygroundAgent:
                 "call_id": call_id,
                 "result": f"Tool '{tool_name}' is not available.",
                 "blocked": True,
+                "errored": False,
                 "reasoning": "Tool not available for this challenge",
             }
 
@@ -451,6 +472,7 @@ class PlaygroundAgent:
                 "call_id": call_id,
                 "result": None,
                 "blocked": True,
+                "errored": False,
                 "reasoning": check_reasoning,
             }
 
@@ -465,6 +487,7 @@ class PlaygroundAgent:
                 "call_id": call_id,
                 "result": f"Unknown tool: {tool_name}",
                 "blocked": False,
+                "errored": True,
                 "reasoning": check_reasoning,
             }
 
@@ -477,11 +500,17 @@ class PlaygroundAgent:
         if tool_name == win.sink:
             exec_args[win.secret_arg] = secret
 
+        # A tool that RAISES did not perform its action, so its call must never score a
+        # win: without ``errored`` the crash still returns ``blocked: False`` and the win
+        # oracle (win.py) reads that as a successful unblocked sink call. It is distinct
+        # from ``blocked`` (a guardrail veto).
+        errored = False
         try:
             result = await tool_fn(self.platform, **exec_args)
         except Exception as e:
             logger.error("playground.tool_error", tool=tool_name, error=str(e))
             result = f"Tool error: {str(e)}"
+            errored = True
 
         # Handle structured results from search_web
         search_results = None
@@ -513,5 +542,6 @@ class PlaygroundAgent:
             "result": result,
             "search_results": search_results,
             "blocked": False,
+            "errored": errored,
             "reasoning": check_reasoning,
         }
