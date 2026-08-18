@@ -26,13 +26,12 @@ from .challenges.models import WinSpec
 
 logger = structlog.get_logger()
 
-# Tool-call keys the win oracle reads but the client never needs. Dropped from the tool
-# calls once the win is evaluated so they stay out of the returned payload.
+# Win-oracle-only keys on a tool-call record that the client never needs.
 _INTERNAL_TOOL_CALL_FIELDS = ("errored",)
 
 
 def _drop_internal_fields(tool_calls: list[dict[str, Any]]) -> None:
-    """Remove win-oracle-only keys from each tool call before it is returned to the client."""
+    """Remove win-oracle-only keys from each tool call before it reaches the client."""
     for tc in tool_calls:
         if isinstance(tc, dict):
             for key in _INTERNAL_TOOL_CALL_FIELDS:
@@ -162,8 +161,7 @@ class PlaygroundAgent:
         # directed at a non-partner host. Only unblocked calls ever count.
         result["success"] = evaluate_win(win, tool_calls)
 
-        # ``errored`` is an internal win-oracle signal (a crashed sink call is not a
-        # break); drop it once the win is evaluated so it stays out of the returned payload.
+        # Sandbox verdict flags are win-oracle-only — drop them before the payload leaves.
         _drop_internal_fields(tool_calls)
 
         return result
@@ -401,8 +399,7 @@ class PlaygroundAgent:
         # plus — for exfil challenges — the sink directed at a non-partner host.
         success = evaluate_win(win, tool_calls)
 
-        # ``errored`` is an internal win-oracle signal (a crashed sink call is not a
-        # break); drop it once the win is evaluated so it stays out of the SSE payload.
+        # Sandbox verdict flags are win-oracle-only — drop them before the payload leaves.
         _drop_internal_fields(tool_calls)
 
         yield SSEEvent(
@@ -535,7 +532,7 @@ class PlaygroundAgent:
             data={"content": result if isinstance(result, str) else json.dumps(result)},
         )
 
-        return {
+        record = {
             "name": tool_name,
             "arguments": tool_args,
             "call_id": call_id,
@@ -545,3 +542,5 @@ class PlaygroundAgent:
             "errored": errored,
             "reasoning": check_reasoning,
         }
+
+        return record
