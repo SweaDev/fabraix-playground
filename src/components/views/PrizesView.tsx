@@ -31,7 +31,7 @@ export function PrizesView() {
 
                 <section className="pg-panel pg-prize-hero">
                     <div>
-                        <div className="pg-prize-hero-amount">{prize ?? '—'}</div>
+                        <div className="pg-prize-hero-amount">{prize ?? '–'}</div>
                         <div className="pg-prize-hero-note">This week's prize</div>
                     </div>
                 </section>
@@ -41,9 +41,9 @@ export function PrizesView() {
                         <h2>How to win</h2>
                     </div>
                     <p className="pg-panel-body">
-                        Whoever logs the <strong>most approved breaks</strong> during the week takes
-                        the prize. Every break you land while logged in is submitted for review; each
-                        approved break adds to your count.
+                        Whoever logs the <strong>most approved breaks</strong> in a week wins.
+                        Every break you land while signed in goes to review, and each approved
+                        one adds to your count.
                     </p>
                 </section>
 
@@ -52,8 +52,8 @@ export function PrizesView() {
                         <h2>The week</h2>
                     </div>
                     <p className="pg-panel-body">
-                        Weeks run Thursday to Wednesday in UTC, ending at midnight Wednesday night UTC.
-                        Breaks approved within that window count toward that week's board.
+                        A week runs Thursday to Wednesday UTC. Breaks approved in that window count
+                        toward that week's board.
                     </p>
                 </section>
 
@@ -62,8 +62,7 @@ export function PrizesView() {
                         <h2>Ties</h2>
                     </div>
                     <p className="pg-panel-body">
-                        If two players finish the week tied on approved breaks, the one who reached
-                        that count first wins.
+                        On a tie, whoever reached the count first wins.
                     </p>
                 </section>
 
@@ -72,9 +71,9 @@ export function PrizesView() {
                         <h2>Review &amp; payout</h2>
                     </div>
                     <p className="pg-panel-body">
-                        Breaks are reviewed by staff before they count — this keeps the board fair.
-                        Winners are chosen and paid out manually after each week closes. You must be
-                        signed in when you solve for a break to be eligible.
+                        Staff review every break before it counts, which keeps the board fair.
+                        Winners are picked and paid out manually after the week closes. Sign in when
+                        you solve to be eligible.
                     </p>
                 </section>
             </div>

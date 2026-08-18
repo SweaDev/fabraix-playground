@@ -3,8 +3,8 @@
  *
  * Loads the shared state every view needs exactly once at the shell level: the
  * active challenge (the LATEST in the library, matching the old single-page
- * logic, with DEFAULT_CHALLENGE_ID as a fallback), its full detail, and — when
- * logged in — the player's approved-breaks-this-week counter for the sidebar.
+ * logic, with DEFAULT_CHALLENGE_ID as a fallback), its full detail, and - when
+ * logged in - the player's approved-breaks-this-week counter for the sidebar.
  *
  * Rules / Chat / Leaderboard / Sidebar all read from here so they agree on which
  * challenge is active without each refetching.
@@ -36,7 +36,7 @@ interface PlatformContextValue {
     challenge: Challenge | null
     /** Every challenge in the library (for future selection UI). */
     challenges: ChallengeListItem[]
-    /** The active challenge slug (id) — always resolvable, even before detail loads. */
+    /** The active challenge slug (id) - always resolvable, even before detail loads. */
     activeChallengeId: string
     /** True while the initial challenge load is in flight. */
     isLoading: boolean
@@ -84,12 +84,12 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
                 localStorage.removeItem(VARIANT_STORAGE_KEY)
             }
         } catch {
-            /* storage may be unavailable — the in-memory choice still applies */
+            /* storage may be unavailable - the in-memory choice still applies */
         }
     }, [])
 
-    // Model catalog loads once. Every session faces a concrete model — there's no
-    // "random"/server-default option — so resolve the choice to a real variant:
+    // Model catalog loads once. Every session faces a concrete model - there's no
+    // "random"/server-default option - so resolve the choice to a real variant:
     // keep a still-valid persisted pick, otherwise default to the first model.
     // (When no models are configured at all, the picker hides and sessions fall
     // through to the server default; variantId stays undefined.)

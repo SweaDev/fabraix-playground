@@ -30,7 +30,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 function applyTheme(theme: Theme): void {
     document.documentElement.classList.toggle('dark', theme === 'dark')
-    // Keep the browser chrome (mobile status/URL-bar tint) on-theme too — the
+    // Keep the browser chrome (mobile status/URL-bar tint) on-theme too - the
     // meta ships with the light value as the pre-paint default.
     document
         .querySelector('meta[name="theme-color"]')
@@ -41,7 +41,7 @@ function persist(theme: Theme): void {
     try {
         localStorage.setItem(STORAGE_KEY, theme)
     } catch {
-        /* storage may be unavailable (private mode) — the class still applies */
+        /* storage may be unavailable (private mode) - the class still applies */
     }
 }
 
@@ -54,7 +54,7 @@ function initialTheme(): Theme {
 export function ThemeProvider({ children }: { children: ReactNode }) {
     const [theme, setTheme] = useState<Theme>(initialTheme)
 
-    // Re-assert on theme changes (idempotent) — this also fixes up the
+    // Re-assert on theme changes (idempotent) - this also fixes up the
     // theme-color meta when the pre-paint script resolved to dark.
     useEffect(() => {
         applyTheme(theme)
@@ -74,7 +74,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         const mq = window.matchMedia('(prefers-color-scheme: dark)')
         const onChange = (e: MediaQueryListEvent) => {
             try {
-                if (localStorage.getItem(STORAGE_KEY)) return // user chose — respect it
+                if (localStorage.getItem(STORAGE_KEY)) return // user chose - respect it
             } catch {
                 /* ignore */
             }

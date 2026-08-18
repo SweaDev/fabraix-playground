@@ -20,7 +20,7 @@ export function setToken(token: string): void {
     try {
         localStorage.setItem(TOKEN_KEY, token)
     } catch {
-        /* storage unavailable (private mode) — login simply won't persist */
+        /* storage unavailable (private mode) - login simply won't persist */
     }
 }
 
@@ -39,7 +39,7 @@ export function clearToken(): void {
  *
  * Run this synchronously BEFORE React mounts (see main.tsx): the session-start
  * request fires from a child effect, which React runs before the AuthProvider
- * (parent) effect — so capturing the token in an effect would let that first
+ * (parent) effect - so capturing the token in an effect would let that first
  * post-login session go out anonymous and miss prize eligibility.
  */
 export function captureTokenFromUrl(): void {
@@ -67,6 +67,6 @@ export function captureTokenFromUrl(): void {
                 + (hash ? `#${hash}` : '')
         )
     } catch {
-        /* storage/history unavailable — login simply won't persist */
+        /* storage/history unavailable - login simply won't persist */
     }
 }

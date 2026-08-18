@@ -20,7 +20,7 @@ const TABS: TabDef[] = [
 ]
 
 /**
- * The primary tab navigation — horizontal bottom-border underline tabs (mirrors
+ * The primary tab navigation - horizontal bottom-border underline tabs (mirrors
  * clients/app). The challenge + prize context now lives in the left rail
  * (ChallengeRail), so this is just the tabs.
  */
@@ -29,7 +29,7 @@ export function TabNav() {
     const navRef = useRef<HTMLElement>(null)
     const { pathname } = useLocation()
 
-    // The bar scrolls horizontally on phones — keep the active tab in view (a
+    // The bar scrolls horizontally on phones - keep the active tab in view (a
     // deep link / reload on an off-screen tab would otherwise show no active
     // indicator at all).
     useEffect(() => {

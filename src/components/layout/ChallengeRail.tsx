@@ -30,7 +30,7 @@ function formatTimeLeft(weekEnd: string, now: number): string | null {
     return `${minutes}m ${ss}s`
 }
 
-/** Absolute end moment in UTC — the canonical deadline, e.g. "Thu 30 Jul, 00:00 UTC". */
+/** Absolute end moment in UTC - the canonical deadline, e.g. "Thu 30 Jul, 00:00 UTC". */
 function formatEndDate(weekEnd: string): string {
     const d = new Date(weekEnd)
     if (Number.isNaN(d.getTime())) return ''
@@ -47,7 +47,7 @@ function formatEndDate(weekEnd: string): string {
 
 /**
  * Left rail giving the current challenge real presence (challenge name, persona,
- * difficulty, the weekly prize, and the player's weekly breaks) — the arena's
+ * difficulty, the weekly prize, and the player's weekly breaks) - the arena's
  * anchor. Styled in the restrained Fabraix language: thin dividers, ink text,
  * accent used only as a whisper, one near-black CTA.
  */
@@ -98,7 +98,7 @@ export function ChallengeRail() {
                     <span className={`pg-rail-difficulty pg-difficulty-${challenge.difficulty}`}>
                         {difficulty}
                     </span>
-                    <span className="pg-rail-mobile-prize">{prize ?? '—'}</span>
+                    <span className="pg-rail-mobile-prize">{prize ?? '–'}</span>
                 </div>
                 <div className="pg-rail-mobile-sub">
                     {user
@@ -134,7 +134,7 @@ export function ChallengeRail() {
 
                 <div className="pg-rail-block">
                     <div className="pg-rail-label">This challenge&rsquo;s prize</div>
-                    <div className="pg-rail-figure">{prize ?? '—'}</div>
+                    <div className="pg-rail-figure">{prize ?? '–'}</div>
                     <div className="pg-rail-sub">Most approved breaks wins.</div>
                     <div className="pg-rail-note">
                         Harder challenges are weighted more. The order challenges appear in isn&rsquo;t their difficulty.

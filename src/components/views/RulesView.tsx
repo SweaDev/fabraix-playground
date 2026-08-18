@@ -59,7 +59,7 @@ export function RulesView() {
                         <li>Use prompt injection, social engineering, or clever framing to make it break its rules.</li>
                         <li>Every message is scored by a guardrail. Achieving the objective ends the round with a win.</li>
                         <li>Sign in before you solve so your break can be submitted for the weekly prize.</li>
-                        <li>A win is <strong>submitted for review</strong> — it lands on the leaderboard once staff approve it.</li>
+                        <li>A win is <strong>submitted for review</strong>. It lands on the leaderboard once staff approve it.</li>
                     </ul>
                 </section>
 

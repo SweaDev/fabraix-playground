@@ -2,7 +2,7 @@
  * Hook for managing the per-message guardrail verdict: status + reason.
  *
  * The static "active guardrails" list was retired with the SAFE-panel shrink, so
- * this now tracks only the one thing the panel renders — did the guardrail hold
+ * this now tracks only the one thing the panel renders - did the guardrail hold
  * (`status`) and why (`reason`).
  */
 

@@ -130,7 +130,7 @@ export function useChallengeGame({
         async function initializeSession() {
             setIsInitializing(true)
 
-            // Try to restore from storage — but only a session that ran against
+            // Try to restore from storage - but only a session that ran against
             // the currently-selected model; a stale run on another model would
             // silently misattribute the conversation.
             const saved = storage.loadSession()
@@ -230,7 +230,7 @@ export function useChallengeGame({
 
             setMessages(messagesWithResponse)
 
-            // Track win state — freeze the timer so the recorded solve time
+            // Track win state - freeze the timer so the recorded solve time
             // (shown in the win banner) stops counting up after the solve.
             if (result.success) {
                 setHasWon(true)
@@ -273,7 +273,7 @@ export function useChallengeGame({
         if (inputValue.length > MAX_MESSAGE_LENGTH) {
             analysis.setStatus('safe')
             analysis.setReason(
-                `Message is too long — max ${MAX_MESSAGE_LENGTH.toLocaleString()} characters.`
+                `Message is too long. Max ${MAX_MESSAGE_LENGTH.toLocaleString()} characters.`
             )
             return
         }
@@ -319,7 +319,7 @@ export function useChallengeGame({
             }
             console.error('Chat error:', error)
 
-            // Session ended (e.g. after leaderboard submission) — stop allowing further messages
+            // Session ended (e.g. after leaderboard submission) - stop allowing further messages
             if (error instanceof ApiError && error.statusCode === 400) {
                 setHasWon(true)
                 analysis.setStatus('safe')
@@ -333,7 +333,7 @@ export function useChallengeGame({
             if (error instanceof ApiError && error.statusCode === 422) {
                 analysis.setStatus('safe')
                 analysis.setReason(
-                    `Message is too long — max ${MAX_MESSAGE_LENGTH.toLocaleString()} characters.`
+                    `Message is too long. Max ${MAX_MESSAGE_LENGTH.toLocaleString()} characters.`
                 )
                 return
             }

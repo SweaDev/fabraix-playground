@@ -16,8 +16,8 @@ const fmtRate = (rate: number) => `${(rate * 100).toFixed(1)}%`
 type BoardTab = 'players' | 'models'
 
 /**
- * Standings, in two boards: Players — this week's prize race, ranked by MOST
- * approved breaks (submissions are reviewed before they appear) — and Models —
+ * Standings, in two boards: Players - this week's prize race, ranked by MOST
+ * approved breaks (submissions are reviewed before they appear) - and Models -
  * the all-time attack success rate against each (opaquely named) model.
  */
 export function LeaderboardView() {
@@ -70,7 +70,7 @@ export function LeaderboardView() {
                             <h1 className="pg-view-title">Success rate by model</h1>
                             <p className="pg-view-lede">
                                 All-time share of played sessions that ended in a break, per model.
-                                Models keep their arena names — pick one to face from the Model
+                                Models keep their arena names. Pick one to face from the Model
                                 selector before you play.
                             </p>
                         </>
@@ -134,7 +134,7 @@ export function LeaderboardView() {
                                 <Loader2 size={22} className="animate-spin" />
                             </div>
                         ) : modelBoard.length === 0 ? (
-                            <p className="pg-empty">No model stats yet — play a few rounds first.</p>
+                            <p className="pg-empty">No model stats yet. Play a few rounds first.</p>
                         ) : (
                             <table className="pg-table">
                                 <thead>

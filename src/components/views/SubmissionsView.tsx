@@ -21,7 +21,7 @@ const STATUS_CLASS: Record<ReviewStatus, string> = {
 }
 
 const fmtDate = (iso: string | null) =>
-    iso ? new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
+    iso ? new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–'
 
 const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 
@@ -74,7 +74,7 @@ export function SubmissionsView() {
                     {subs === null ? (
                         <div className="pg-loading-row"><Loader2 size={22} className="animate-spin" /></div>
                     ) : subs.length === 0 ? (
-                        <p className="pg-empty">No submissions yet — solve a challenge while logged in to submit one.</p>
+                        <p className="pg-empty">No submissions yet. Solve a challenge while signed in to submit one.</p>
                     ) : (
                         <ul className="pg-rows">
                             {subs.map((s) => (

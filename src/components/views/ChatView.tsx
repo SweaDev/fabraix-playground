@@ -21,7 +21,7 @@ type WinState =
  * the sidebar (desktop) / header (mobile) and writes the shared variant choice;
  * this view restarts the live session whenever that choice changes.
  *
- * A win opens a confirmation dialog — the break is only submitted for review
+ * A win opens a confirmation dialog - the break is only submitted for review
  * when the player explicitly asks for it (no background auto-submit). Players
  * who can't submit (anonymous, or no display name yet) get told why instead.
  */
@@ -35,7 +35,7 @@ export function ChatView() {
     })
 
     // Restart onto the newly-picked model when the shared choice changes while
-    // this view is mounted (initial mount just records the starting value —
+    // this view is mounted (initial mount just records the starting value -
     // useChallengeGame already started/restored the session on it).
     const appliedVariantRef = useRef(variantId)
     const changeVariant = game.changeVariant
@@ -47,7 +47,7 @@ export function ChatView() {
 
     const [winState, setWinState] = useState<WinState>('idle')
     const [showWinDialog, setShowWinDialog] = useState(false)
-    // One dialog per solved session — reopening is only possible via a new win.
+    // One dialog per solved session - reopening is only possible via a new win.
     const winDialogSessionRef = useRef<string | null>(null)
 
     useEffect(() => {
@@ -84,9 +84,9 @@ export function ChatView() {
 
     const winBannerText =
         winState === 'submitted'
-            ? `Solved in ${solvedIn} — your break was submitted for review. It appears on Standings once approved.`
+            ? `Solved in ${solvedIn}. Your break was submitted for review, and appears on Standings once approved.`
             : winState === 'submit_failed'
-                ? "We couldn't submit this break — reopen a run and solve again while logged in to submit it."
+                ? "We couldn't submit this break. Reopen a run and solve again while signed in to submit it."
                 : ''
 
     if (!challenge) return null
@@ -146,7 +146,7 @@ export function ChatView() {
                         {winState === 'submitted' ? (
                             <>
                                 <p className="pg-modal-sub">
-                                    Submitted for review — your break appears on Standings once
+                                    Submitted for review. Your break appears on Standings once
                                     staff approve it.
                                 </p>
                                 <div className="pg-modal-actions">
@@ -162,7 +162,7 @@ export function ChatView() {
                                     count it toward the weekly prize?
                                 </p>
                                 {winState === 'submit_failed' && (
-                                    <p className="pg-error">Submission failed — try again.</p>
+                                    <p className="pg-error">Submission failed. Try again.</p>
                                 )}
                                 <div className="pg-modal-actions">
                                     <button
@@ -195,7 +195,7 @@ export function ChatView() {
                         ) : (
                             <>
                                 <p className="pg-modal-sub">
-                                    Solved in {solvedIn} — but you weren't logged in, so this break
+                                    Solved in {solvedIn}, but you weren't signed in, so this break
                                     can't be submitted for the weekly prize. Sign in before solving
                                     to be eligible.
                                 </p>

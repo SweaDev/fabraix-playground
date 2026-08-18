@@ -10,10 +10,10 @@ import { useAuth } from '@/context/auth'
 import { LoginGate } from './LoginGate'
 
 const fmtDate = (iso: string | null) =>
-    iso ? new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
+    iso ? new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–'
 
 const fmtTime = (s: number | null) =>
-    s != null ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` : '—'
+    s != null ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` : '–'
 
 /**
  * The player's own sessions (newest first). Clicking one replays its transcript
@@ -123,7 +123,7 @@ export function PreviousChatsView() {
                     {solves === null ? (
                         <div className="pg-loading-row"><Loader2 size={22} className="animate-spin" /></div>
                     ) : solves.length === 0 ? (
-                        <p className="pg-empty">No sessions yet — head to Chat to start a run.</p>
+                        <p className="pg-empty">No sessions yet. Head to Chat to start a run.</p>
                     ) : (
                         <ul className="pg-rows">
                             {solves.map((s) => (

@@ -324,7 +324,7 @@ export async function submitLeaderboard(sessionId: string): Promise<LeaderboardS
 export interface WeeklyLeaderboardEntry {
     rank: number
     displayName: string
-    /** Number of approved breaks this week — the ranking key. */
+    /** Number of approved breaks this week - the ranking key. */
     breakCount: number
     lastBreakAt: string
 }
@@ -344,7 +344,7 @@ export async function fetchWeeklyLeaderboard(challengeSlug: string): Promise<Wee
 }
 
 export interface ModelBoardEntry {
-    /** Opaque public name — the real model is never exposed. */
+    /** Opaque public name - the real model is never exposed. */
     displayName: string
     /** Sessions where the player actually engaged (≥1 turn). */
     attempts: number
@@ -373,7 +373,7 @@ export interface MySolve {
     createdAt: string
 }
 
-/** The authenticated player's own attempts/solves (newest first) — "Previous Chats". */
+/** The authenticated player's own attempts/solves (newest first) - "Previous Chats". */
 export async function fetchMySolves(): Promise<MySolve[]> {
     return apiRequest<MySolve[]>('/playground/me/solves')
 }
@@ -390,7 +390,7 @@ export interface Submission {
     createdAt: string
 }
 
-/** The caller's own leaderboard submissions + their moderation state — "Submissions". */
+/** The caller's own leaderboard submissions + their moderation state - "Submissions". */
 export async function fetchMySubmissions(): Promise<Submission[]> {
     return apiRequest<Submission[]>('/playground/me/submissions')
 }

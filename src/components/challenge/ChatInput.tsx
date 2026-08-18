@@ -22,7 +22,7 @@ export function ChatInput({
     isLoading,
     inputRef,
 }: ChatInputProps) {
-    // Focus input on mount — desktop only; on touch devices an uninvited focus
+    // Focus input on mount - desktop only; on touch devices an uninvited focus
     // pops the software keyboard over half the viewport.
     useEffect(() => {
         if (window.matchMedia('(pointer: fine)').matches) {
@@ -90,7 +90,7 @@ export function ChatInput({
             </div>
             {overLimit && (
                 <p className="chat-input-error" role="alert">
-                    Message is too long — max{' '}
+                    Message is too long. Max{' '}
                     {MAX_MESSAGE_LENGTH.toLocaleString()} characters. Please
                     shorten it by {(value.length - MAX_MESSAGE_LENGTH).toLocaleString()}.
                 </p>

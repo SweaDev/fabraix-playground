@@ -26,7 +26,7 @@ export function getOrCreateUserId(): string {
         localStorage.setItem(KEY, id)
         return id
     } catch {
-        // localStorage unavailable (e.g. private mode) — fall back to ephemeral.
+        // localStorage unavailable (e.g. private mode) - fall back to ephemeral.
         return `pg-player-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
     }
 }
