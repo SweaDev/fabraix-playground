@@ -558,6 +558,15 @@
   margin-top: 0.15rem;
 }
 
+/* The Submit action for a solved-but-unsubmitted run. It sits OUTSIDE .pg-row
+   (a button inside a button is invalid HTML, and the click would also open the
+   transcript), so it is indented to line up under the row it belongs to. */
+.pg-row-action {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 1.1rem 0.85rem;
+}
+
 .pg-row-side {
   display: flex;
   align-items: center;

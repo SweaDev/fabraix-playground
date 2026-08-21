@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
-import { ArrowLeft, Loader2, ChevronRight } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { ArrowLeft, Loader2, ChevronRight, Trophy } from 'lucide-react'
 import {
     fetchMySolves,
+    fetchMySubmissions,
     fetchSessionMessages,
+    submitLeaderboard,
     type MySolve,
     type SessionTranscript,
 } from '@/api'
@@ -18,11 +20,22 @@ const fmtTime = (s: number | null) =>
 /**
  * The player's own sessions (newest first). Clicking one replays its transcript
  * via the owner-scoped messages endpoint. Login-gated.
+ *
+ * A solved session that never reached the board can be submitted from here. The
+ * win dialog in Chat only ever offers itself once, on the session that won, so
+ * before this a break whose submit failed - or that the player dismissed, or
+ * restarted past - was unrecoverable even though the server still had it marked
+ * solved. `POST /playground/leaderboard` never checks `ended_at`, so a solved
+ * session stays submittable forever; only the UI was missing.
  */
 export function PreviousChatsView() {
     const { user, isLoading: isAuthLoading } = useAuth()
 
     const [solves, setSolves] = useState<MySolve[] | null>(null)
+    // Session ids already on the board - those get a status, not a button.
+    const [submitted, setSubmitted] = useState<Set<string>>(new Set())
+    const [submitting, setSubmitting] = useState<string | null>(null)
+    const [submitError, setSubmitError] = useState<string | null>(null)
     const [selected, setSelected] = useState<string | null>(null)
     const [transcript, setTranscript] = useState<SessionTranscript | null>(null)
     const [loadingTranscript, setLoadingTranscript] = useState(false)
@@ -33,8 +46,31 @@ export function PreviousChatsView() {
         fetchMySolves()
             .then((s) => { if (!cancelled) setSolves(s) })
             .catch(() => { if (!cancelled) setSolves([]) })
+        fetchMySubmissions()
+            .then((subs) => {
+                if (!cancelled) setSubmitted(new Set(subs.map((x) => x.sessionId)))
+            })
+            // A failed lookup must not hide the button: the submit itself is
+            // idempotent, so offering it again is safe.
+            .catch(() => { if (!cancelled) setSubmitted(new Set()) })
         return () => { cancelled = true }
     }, [user])
+
+    const submit = useCallback(async (sessionId: string) => {
+        setSubmitting(sessionId)
+        setSubmitError(null)
+        try {
+            await submitLeaderboard(sessionId)
+            setSubmitted((prev) => new Set(prev).add(sessionId))
+        } catch (e) {
+            // Show the server's own reason. The Chat dialog swallows it behind
+            // "Submission failed. Try again.", which is what sent one player
+            // renaming their profile for nine minutes chasing the wrong cause.
+            setSubmitError(e instanceof Error ? e.message : 'Submission failed.')
+        } finally {
+            setSubmitting(null)
+        }
+    }, [])
 
     useEffect(() => {
         if (!selected) {
@@ -116,8 +152,15 @@ export function PreviousChatsView() {
                         History
                     </div>
                     <h1 className="pg-view-title">Your sessions</h1>
-                    <p className="pg-view-lede">Every session you've played, newest first. Open one to replay it.</p>
+                    <p className="pg-view-lede">
+                        Every session you've played, newest first. Open one to replay it.
+                        A solved run that isn't on the board yet can be submitted from here.
+                    </p>
                 </header>
+
+                {submitError && (
+                    <p className="pg-error" role="alert">{submitError}</p>
+                )}
 
                 <section className="pg-panel pg-panel-flush">
                     {solves === null ? (
@@ -144,9 +187,26 @@ export function PreviousChatsView() {
                                             ) : (
                                                 <span className="pg-badge pg-badge-neutral">In progress</span>
                                             )}
+                                            {s.solved && submitted.has(s.sessionId) && (
+                                                <span className="pg-badge pg-badge-neutral">Submitted</span>
+                                            )}
                                             <ChevronRight size={16} className="pg-muted" />
                                         </div>
                                     </button>
+                                    {s.solved && !submitted.has(s.sessionId) && (
+                                        <div className="pg-row-action">
+                                            <button
+                                                className="nav-cta"
+                                                onClick={() => submit(s.sessionId)}
+                                                disabled={submitting === s.sessionId}
+                                            >
+                                                <Trophy size={14} />
+                                                {submitting === s.sessionId
+                                                    ? 'Submitting…'
+                                                    : 'Submit for review'}
+                                            </button>
+                                        </div>
+                                    )}
                                 </li>
                             ))}
                         </ul>

@@ -380,6 +380,8 @@ export async function fetchMySolves(): Promise<MySolve[]> {
 
 export interface Submission {
     id: string
+    /** The solved session this break was submitted from. */
+    sessionId: string
     challengeSlug: string
     timeSeconds: number
     reviewStatus: ReviewStatus
