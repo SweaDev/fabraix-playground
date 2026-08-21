@@ -48,7 +48,15 @@ interface UseChallengeGameReturn {
     isRestarting: boolean
     attempts: number
     elapsedTime: number
+    /** A SERVER-confirmed break: set only from a COMPLETE event's `success`. */
     hasWon: boolean
+    /**
+     * The session is over server-side (restarted from another tab, or ended by a
+     * leaderboard submit), so it accepts no more messages. Distinct from `hasWon`:
+     * an ended session is usually NOT a win, and conflating the two showed players
+     * a "You broke Iris" dialog for a session they had not solved.
+     */
+    sessionEnded: boolean
     sessionId: string | null
 
     // Analysis state
@@ -95,6 +103,7 @@ export function useChallengeGame({
     const [attempts, setAttempts] = useState(0)
     const [isRestarting, setIsRestarting] = useState(false)
     const [hasWon, setHasWon] = useState(false)
+    const [sessionEnded, setSessionEnded] = useState(false)
 
     // ========================================================================
     // Composed Hooks
@@ -152,6 +161,9 @@ export function useChallengeGame({
             setSessionId(saved.sessionId)
             setMessages(deserializeMessages(saved.messages))
             setAttempts(saved.attempts)
+            // Derived per request from the server's 400, never persisted: a restored
+            // session is playable until the server says otherwise.
+            setSessionEnded(false)
             if (saved.hasWon) setHasWon(true)
             analysis.setStatus(saved.status)
             analysis.setReason(saved.reason)
@@ -319,9 +331,14 @@ export function useChallengeGame({
             }
             console.error('Chat error:', error)
 
-            // Session ended (e.g. after leaderboard submission) - stop allowing further messages
+            // The server's ONLY 400 on this route is "Session has ended" - the session
+            // was restarted (often from a SECOND TAB still holding the old session id)
+            // or ended by a leaderboard submit. That is not a win, and it must never
+            // set `hasWon`: doing so opens the "You broke Iris" dialog, and the submit
+            // behind it then fails with "Challenge not completed yet" because the
+            // server never marked the session solved.
             if (error instanceof ApiError && error.statusCode === 400) {
-                setHasWon(true)
+                setSessionEnded(true)
                 analysis.setStatus('safe')
                 analysis.setReason('Session complete. Restart to play again.')
                 return
@@ -380,6 +397,7 @@ export function useChallengeGame({
             setInputValue('')
             setAttempts(0)
             setHasWon(false)
+            setSessionEnded(false)
 
             // Reset composed hooks
             analysis.resetAnalysis()
@@ -422,6 +440,7 @@ export function useChallengeGame({
         setInputValue('')
         setAttempts(0)
         setHasWon(false)
+        setSessionEnded(false)
         analysis.resetAnalysis()
         processing.clearStatus()
         timer.reset()
@@ -497,6 +516,7 @@ export function useChallengeGame({
         attempts,
         elapsedTime: timer.elapsedTime,
         hasWon,
+        sessionEnded,
         sessionId,
 
         // Analysis state

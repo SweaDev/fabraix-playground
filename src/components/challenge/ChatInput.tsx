@@ -11,6 +11,8 @@ interface ChatInputProps {
     onKeyDown: (e: React.KeyboardEvent) => void
     onSubmit: () => void
     isLoading: boolean
+    /** The session is over server-side; sending would only earn another 400. */
+    isEnded?: boolean
     inputRef: React.RefObject<HTMLTextAreaElement | null>
 }
 
@@ -20,6 +22,7 @@ export function ChatInput({
     onKeyDown,
     onSubmit,
     isLoading,
+    isEnded = false,
     inputRef,
 }: ChatInputProps) {
     // Focus input on mount - desktop only; on touch devices an uninvited focus
@@ -51,7 +54,7 @@ export function ChatInput({
     )
 
     const overLimit = value.length > MAX_MESSAGE_LENGTH
-    const canSubmit = value.trim() && !isLoading && !overLimit
+    const canSubmit = value.trim() && !isLoading && !overLimit && !isEnded
     // Only surface the counter as the user nears the cap, so the common case
     // (short messages) stays uncluttered.
     const showCounter = value.length >= MAX_MESSAGE_LENGTH * 0.9
@@ -67,7 +70,7 @@ export function ChatInput({
                     placeholder="Enter your message..."
                     className="chat-input"
                     rows={1}
-                    disabled={isLoading}
+                    disabled={isLoading || isEnded}
                     aria-invalid={overLimit}
                 />
                 <div className="chat-input-actions">
@@ -88,6 +91,12 @@ export function ChatInput({
                     </button>
                 </div>
             </div>
+            {isEnded && (
+                <p className="chat-input-error" role="status">
+                    This run has ended - it was restarted, possibly in another tab.
+                    Hit Restart to start a fresh one.
+                </p>
+            )}
             {overLimit && (
                 <p className="chat-input-error" role="alert">
                     Message is too long. Max{' '}

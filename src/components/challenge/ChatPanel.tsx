@@ -15,6 +15,8 @@ interface ChatPanelProps {
     onKeyDown: (e: React.KeyboardEvent) => void
     onSubmit: () => void
     isLoading: boolean
+    /** The session is over server-side; the composer is locked until a restart. */
+    isEnded?: boolean
     inputRef: React.RefObject<HTMLTextAreaElement | null>
     currentStatus: string | null
     steps: ProcessingStep[]
@@ -28,6 +30,7 @@ export function ChatPanel({
     onKeyDown,
     onSubmit,
     isLoading,
+    isEnded = false,
     inputRef,
     currentStatus,
     steps,
@@ -48,6 +51,7 @@ export function ChatPanel({
                 onKeyDown={onKeyDown}
                 onSubmit={onSubmit}
                 isLoading={isLoading}
+                isEnded={isEnded}
                 inputRef={inputRef}
             />
         </section>

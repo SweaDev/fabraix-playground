@@ -115,6 +115,7 @@ export function ChatView() {
                 onKeyDown={game.handleKeyDown}
                 onSubmit={game.sendMessage}
                 isLoading={game.isLoading || game.isInitializing}
+                isEnded={game.sessionEnded}
                 inputRef={game.inputRef}
                 currentStatus={game.currentStatus}
                 steps={game.steps}
