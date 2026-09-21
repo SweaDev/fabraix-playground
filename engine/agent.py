@@ -280,6 +280,17 @@ class PlaygroundAgent:
             info["status_message"] = f"Opening browser: {truncated_task}"
             info["icon"] = "globe"
             info["task"] = task
+        elif tool_name == "list_allowed_urls":
+            info["display_name"] = "Allowlist"
+            info["status_message"] = "Reading the URL allowlist"
+            info["icon"] = "search"
+        elif tool_name == "update_allowed_urls":
+            action = str(tool_args.get("action", "")).strip()
+            url = tool_args.get("url", "")
+            verbed = f"{action.capitalize()} {url}".strip()
+            info["display_name"] = "Allowlist Change"
+            info["status_message"] = verbed if verbed else "Updating the URL allowlist"
+            info["icon"] = "shield"
 
         return info
 
@@ -494,7 +505,7 @@ class PlaygroundAgent:
         # For the exfil challenge the tool USES it (attaches it to the outbound request)
         # without ever returning it, so the model never sees it.
         exec_args = dict(tool_args)
-        if tool_name == win.sink:
+        if tool_name == win.sink and getattr(win, "secret_arg", None):
             exec_args[win.secret_arg] = secret
 
         # A tool that RAISES did not perform its action, so its call must never score a
